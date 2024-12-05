@@ -15,6 +15,7 @@ import {
 	removeAllActionsFromTicket,
 	disableTicketSelection,
 	filterButtonIsDisabled,
+	replaceSharedCapacityInput,
 } from './hook-callbacks';
 
 const shouldRenderAssignedSeatingForm = true;
@@ -24,11 +25,21 @@ const shouldRenderAssignedSeatingForm = true;
  *
  * @param {function(): void} renderDefaultForm The render function of the Capacity form.k
  * @param {string }          clientId          The client ID of the ticket block.
+ * @param {string}           ticketProvider    The ticket provider.
  *
  * @return {Function} The render function of the Capacity form with the seating options.
  */
-function filterRenderCapacityForm(renderDefaultForm, { clientId }) {
+function filterRenderCapacityForm(renderDefaultForm, { clientId, ticketProvider }) {
 	if (!shouldRenderAssignedSeatingForm) {
+		return renderDefaultForm;
+	}
+
+	if ( ticketProvider !== "TEC\\Tickets\\Commerce\\Module" && ticketProvider !== 'tc' ) {
+		return renderDefaultForm;
+	}
+
+	// When no license, we DO NOT render the radios General vs Seating.
+	if ('no-license' === select(storeName).getServiceStatus()) {
 		return renderDefaultForm;
 	}
 
@@ -55,7 +66,7 @@ addFilter(
 /**
  * Filters the action items of the dashboard to add the seating actions.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Array}  actions  The action items of the dashboard.
  * @param {string} clientId The client ID of the ticket block.
@@ -83,7 +94,7 @@ addFilter(
 /**
  * Filters the ticket edit action items to remove the move button for seated tickets.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Object[]} actions  The action items of the ticket.
  * @param {string}   clientId The client ID of the ticket block.
@@ -169,4 +180,10 @@ addFilter(
 	'tec.tickets.blocks.Ticket.isSelected',
 	'tec.tickets.seating',
 	disableTicketSelection
+);
+
+addFilter(
+	'tec.tickets.blocks.Tickets.CapacityTable.sharedCapacityInput',
+	'tec.tickets.seating',
+	replaceSharedCapacityInput
 );

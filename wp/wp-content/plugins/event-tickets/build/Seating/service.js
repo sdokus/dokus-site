@@ -190,7 +190,7 @@ const unknownError = _x('Unknown error', 'Error message', 'event-tickets');
 /**
  * A map from error codes to error messages.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @type {string: string}
  */
@@ -208,7 +208,7 @@ const errorCodeToMessageMap = {
 /**
  * Returns the error message for the given error code.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} errorCode The error code.
  *
@@ -238,7 +238,7 @@ function notices_objectSpread(target) { for (var i = 1; i < arguments.length; i+
 /**
  * Gets a reference to the notice element from the DOM.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {Element|null} The notice element, or null if it does not exist.j
  */
@@ -249,7 +249,7 @@ function getNoticeElement() {
 /**
  * Hides the notice element.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Element|null} notice The notice element to hide.
  */
@@ -264,7 +264,7 @@ function hideNotice(notice) {
 /**
  * Shows the notice element.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Element|null} notice The notice element to show.
  */
@@ -279,7 +279,7 @@ function showNotice(notice) {
 /**
  * Sets the notice element to display the given class.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Element|null} notice    The notice element to manipulate.
  * @param {string}       className The class to set; all other classes will be removed.
@@ -298,7 +298,7 @@ function setNoticeClass(notice, className) {
 /**
  * Sets the notice element to display the given message.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Element|null} notice  The notice element to manipulate.
  * @param {string}       message The message to display.
@@ -313,7 +313,7 @@ function setNoticeMessage(notice, message) {
 /**
  * Notifies the user of an error by manipulating the notice element.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} message The message to display.
  */
@@ -328,7 +328,7 @@ function notifyUserOfError(message) {
 /**
  * Notifies the user of a warning by manipulating the notice element.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} message The message to display.
  */
@@ -369,7 +369,7 @@ const mapsHomeUrl = localizedData.mapsHomeUrl.replace(/\/$/, '');
 const layoutsHomeUrl = localizedData.layoutsHomeUrl.replace(/\/$/, '');
 const associatedEventsUrl = localizedData.associatedEventsUrl.replace(/\/$/, '');
 function getBaseUrl() {
-  return baseUrl;
+  return baseUrl.split('?')[0];
 }
 // CONCATENATED MODULE: ./src/Tickets/Seating/app/service/api/service-actions.js
 // Readiness and connection actions.
@@ -414,7 +414,7 @@ var external_tec_tickets_seating_ajax_ = __webpack_require__("lL5a");
 /**
  * The default message handler that will be called when a message is received from the service.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {MessageEvent} event The message event received from the service.
  *
@@ -427,7 +427,7 @@ function defaultMessageHandler(event) {
 /**
  * Sends a POST request to the backend to invalidate the Maps and Layouts cache.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {Promise<boolean>} A promise that will resolve to `true` if the request was successful, `false` otherwise.
  */
@@ -438,7 +438,7 @@ function invalidateMapsLayoutsCache() {
 /**
  * Sends a POST request to the backend to invalidate the Layouts cache.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {Promise<boolean>} A promise that will resolve to `true` if the request was successful, `false` otherwise.
  */
@@ -465,7 +465,7 @@ function invalidateLayoutsCache() {
 /**
  * Fires when a Map is created or updated on the Service.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {void}
  */
@@ -492,7 +492,7 @@ function onMapCreatedUpdated() {
 /**
  * Fires when a Layout is created or updated on the Service.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {void}
  */
@@ -503,7 +503,7 @@ function onLayoutCreatedUpdated() {
 /**
  * Fires when a Seat type is created or updated on the Service.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {void}
  */
@@ -514,7 +514,7 @@ function onSeatTypeCreatedUpdated() {
 /**
  * On request to go to the Maps home from the Service, redirect to the Maps home.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {void}
  */
@@ -529,7 +529,7 @@ function onGoToMapsHome() {
 /**
  * On request to go to the Layouts home from the Service, redirect to the Layouts home.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {void}
  */
@@ -577,7 +577,7 @@ const state = {
 /**
  * Returns the handler for a given action, or the default handler if none is found.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} action The action to get the handler for.
  *
@@ -590,7 +590,7 @@ function getHandlerForAction(action) {
 /**
  * Registers an action and its callback.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string}   action   The action to register the callback for.
  * @param {Function} callback The callback to register for the action.
@@ -602,7 +602,7 @@ function registerAction(action, callback) {
 /**
  * Removes an action and its callback form the actions map.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} action The action to remove form the actions map.
  */
@@ -613,7 +613,7 @@ function removeAction(action) {
 /**
  * Returns the actions map.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {Object} The actions map.
  */
@@ -624,7 +624,7 @@ function getRegisteredActions() {
 /**
  * Sets the ready state of the Service.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {boolean} isReady Whether the Service is ready or not.
  */
@@ -635,7 +635,7 @@ function setIsReady(isReady) {
 /**
  * Returns whether the Service is ready or not.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {boolean} Whether the Service is ready or not.
  */
@@ -646,7 +646,7 @@ function getIsReady() {
 /**
  * Sets whether the Service is establishing readiness or not.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {boolean} establishingReadiness Whether the Service is establishing or not.
  */
@@ -657,7 +657,7 @@ function setEstablishingReadiness(establishingReadiness) {
 /**
  * Returns whether the Service is establishing readiness or not.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {boolean} Whether the Service is establishing readiness or not.
  */
@@ -668,7 +668,7 @@ function getEstablishingReadiness() {
 /**
  * Sets the token used to communicate with the service.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} token The token to set.
  */
@@ -679,7 +679,7 @@ function setToken(token) {
 /**
  * Returns the current ephemeral token used to communicate with the service.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {string} The current ephemeral token.
  */
@@ -692,7 +692,7 @@ function getToken() {
  *
  * This is useful for testing and should not be used in production.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {void}
  */
@@ -720,7 +720,7 @@ let handlerQueue = [];
 /**
  * Posts a message to the service iframe.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLIFrameElement} iframe The iframe to post the message to.
  * @param {string}            action The message action.
@@ -747,7 +747,7 @@ function sendPostMessage(iframe, action, data) {
  * A "wrapper handler" is a handler that will execute its own code and call the next handler
  * in the queue or, if thenable, will resolve and then call the next handler.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {void}
  */
@@ -765,7 +765,7 @@ function callNextHandler() {
  *
  * Since all functions can be awaited, the wrapper will treat all functions as async functions.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Function} handler The handler to wrap.
  *
@@ -793,7 +793,7 @@ function wrapHandlerForQueue(handler) {
  * Handlers are called based on the `state.actionsMap` map that is controlled
  * using the `takeAction` and `takeEveryAction` functions.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {MessageEvent} event The message event received from the service.
  */
@@ -820,7 +820,7 @@ function catchMessage(event) {
 /**
  * Listens for service messages.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLIFrameElement} iframe The iframe to listen for messages from.
  *
@@ -847,7 +847,7 @@ function startListeningForServiceMessages(iframe) {
  * The connection is initiated by the Service by sending a `app_postmessage_ready` message through the iframe.
  * The Site will reply with a `host_postmessage_ready` message to confirm the connection is established.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLIFrameElement} iframe The iframe to establish the connection with the service.
  *
@@ -860,7 +860,7 @@ function establishReadiness(_x2) {
 /**
  * Returns the handler queue for the service.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {Object<string, Function>} The handler queue for the service.
  */
@@ -891,10 +891,10 @@ function _establishReadiness() {
       registerAction(INBOUND_APP_READY, acknowledge);
     });
 
-    // Seat a 10s timeout to reject the promise if the connection is not established.
+    // Seat a 3s timeout to reject the promise if the connection is not established.
     const timeoutId = setTimeout(() => {
       promiseReject(new Error('Connection to service timed out'));
-    }, 10000);
+    }, 3000);
 
     // Finally start loading the service in the iframe and wait for its ready message.
     iframe.src = iframe.dataset.src;
@@ -909,7 +909,7 @@ function getHandlerQueue() {
 /**
  * Empties the handler queue.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {void}
  */
@@ -920,7 +920,7 @@ function emptyHandlerQueue() {
 /**
  * Returns the associated events URL for the given layout ID.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} layoutId The layout ID.
  *
@@ -990,7 +990,7 @@ function init(_x2) {
 /**
  * Returns the first iframe element in the document.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLDocument|null} dom The document to use to get the iframe element.
  *
@@ -1043,7 +1043,7 @@ function initServiceIframe(_x3) {
 /**
  * Handles resize requests.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {ResizeData} data The new height.
  * @param {HTMLDocument|null} dom The document to use to search for the iframe element.

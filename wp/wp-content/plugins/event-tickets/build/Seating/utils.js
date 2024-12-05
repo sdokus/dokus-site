@@ -206,7 +206,7 @@ function getLocalizedString(slug, group) {
  * Resist the temptation to add complex logic to the template.
  * If you need something more elaborate, use React.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} htmlTemplate The HTML template to use. Properties placeholder have the form `{propertyName}`.
  * @param {Object} props        The props to replace in the template.
@@ -228,7 +228,7 @@ function createHtmlComponentFromTemplateString(htmlTemplate, props) {
  * The function will replace each occurrence of `{key}` with the value of the `key` property in the props object.
  * If the key is not found, it will be replaced with an empty string.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} templateId The ID of the template to use.
  * @param {Object} props      The props to replace in the template.
@@ -245,7 +245,7 @@ function createHtmlComponentFromTemplateElement(templateId, props) {
 /**
  * Calls a callback when the DOM is ready.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {function} domReadyCallback The callback to call when the DOM is ready.
  *
@@ -262,7 +262,7 @@ const onReady = domReadyCallback => {
 /**
  * Redirects to a URL.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} url The URL to relocate to.
  * @param {boolean} [newTab=false] Whether to open the URL in a new tab.

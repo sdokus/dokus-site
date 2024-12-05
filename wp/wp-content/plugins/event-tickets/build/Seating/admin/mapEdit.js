@@ -194,7 +194,7 @@ __webpack_require__.r(__webpack_exports__);
 /**
  * Initializes iframe and the communication with the service.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLDocument|null} dom The document to use to search for the iframe element.
  *

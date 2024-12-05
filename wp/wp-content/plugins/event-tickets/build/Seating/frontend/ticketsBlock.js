@@ -240,7 +240,7 @@ var external_tec_tickets_seating_utils_ = __webpack_require__("MsaN");
 /**
  * Create a Ticket Row component for the Seat Selection modal ticket block.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {TicketRowProps} props The props for the Ticket Row component.
  *
@@ -312,7 +312,7 @@ var external_tec_tickets_seating_frontend_session_ = __webpack_require__("KO+N")
  * This is the default checkout handler for the Tickets Commerce in the context of the Tickets Seating feature.
  * This method call the backend to get the redirection URL with the cart data.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {FormData} data The data to send to the Tickets Commerce checkout page.
  *
@@ -326,7 +326,7 @@ function checkoutWithTicketsCommerce(_x) {
  * Returns the checkout handler for a given provider.
  * This function filters the checkout handler for a given provider in the context of the Tickets Seating feature.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} provider The provider to get the checkout handler for.
  *
@@ -372,7 +372,7 @@ function getCheckoutHandlerForProvider(provider) {
   /**
    * Filters the checkout handler for a given provider in the context of the Tickets Seating feature..
    *
-   * @since TBD
+   * @since 5.16.0
    *
    * @param {Function|null} checkoutHandler The checkout handler for the provider.
    * @param {string}        provider        The provider to get the checkout handler for.
@@ -387,7 +387,7 @@ function getCheckoutHandlerForProvider(provider) {
 /**
  * The list of ticket IDs that is checked for availability in the Tickets Block.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @type {number[]}
  */
@@ -399,7 +399,7 @@ const ticketIds = Object.values(localizedData.seatTypeMap).reduce((acc, seatType
 /**
  * Filters the list of Ticket IDS that is checked for availability in the Tickets Block.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {number[]} The filtered list of Ticket IDS that is checked for availability in the Tickets Block.
  */
@@ -438,7 +438,7 @@ const {
 /**
  * The total price element.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @type {HTMLElement|null}
  */
@@ -447,7 +447,7 @@ let totalPriceElement = null;
 /**
  * The total tickets element.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @type {HTMLElement|null}
  */
@@ -456,7 +456,7 @@ let totalTicketsElement = null;
 /**
  * The empty ticket list message element.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @type {HTMLElement|null}
  */
@@ -465,7 +465,7 @@ let emptyTicketMessageElement = null;
 /**
  * The Confirm button selector.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @type {string}
  */
@@ -487,7 +487,7 @@ const confirmSelector = '.tec-tickets-seating__modal .tec-tickets-seating__sideb
 /**
  * The tickets map.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @type {Object<string, SeatMapTicketEntry>}
  */
@@ -501,7 +501,7 @@ const tickets = Object.values(seatTypeMap).reduce((map, seatType) => {
 /**
  * The current fetch signal handler.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @type {AbortController}
  */
@@ -511,7 +511,7 @@ let currentController = new AbortController();
  * Whether the reservations should be cancelled on hide or destroy of the seat selection modal or not.
  * By default, the reservations will be cancelled, but this flag will be set to `false` during checkout.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @type {boolean}
  */
@@ -520,7 +520,7 @@ let shouldCancelReservations = true;
 /**
  * Formats the text representing the total number of tickets selected.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {number} value The value to format.
  *
@@ -533,7 +533,7 @@ function formatTicketNumber(value) {
 /**
  * Disable the Checkout confirmation button(s).
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLElement|null} parentElement The parent element to disable the checkout button for.
  *
@@ -549,7 +549,7 @@ function enableCheckout(parentElement) {
 /**
  * Enables the Checkout confirmation button(s).
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLElement|null} parentElement The parent element to enable the checkout button for.
  *
@@ -565,7 +565,7 @@ function disableCheckout(parentElement) {
 /**
  * Updates the total prices and number of tickets in the block.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLElement|null} parentElement The parent element to update the totals for.
  *
@@ -603,7 +603,7 @@ function updateTotals(parentElement) {
 /**
  * Add a ticket to the selection.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLElement|null}     parentElement The parent element to add the ticket to.
  * @param {TicketSelectionProps} props         The props for the Ticket Row component.
@@ -633,7 +633,7 @@ function addTicketToSelection(parentElement, props) {
 /**
  * Posts the reservations to the backend replacing the existing ones.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Object} reservations The reservation IDs to post to the backend.
  */
@@ -643,7 +643,7 @@ function postReservationsToBackend(_x) {
 /**
  * Updates the tickets selection.
  *
- * @since TBd
+ * @since 5.16.0
  *
  * @param {HTMLElement|null}       parentElement The parent element to add the tickets to.
  * @param {TicketSelectionProps[]} items         The items to add to the selection.
@@ -697,7 +697,7 @@ function updateTicketsSelection(parentElement, items) {
 /**
  * Updates the empty tickets message.
  *
- * @since TBd
+ * @since 5.16.0
  *
  * @param {number|null} ticketCount The number of selected tickets.
  */
@@ -712,7 +712,7 @@ function updateEmptyTicketsMessage(ticketCount) {
 /**
  * Validates a selection item received from the service is valid.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Object} item The item to validate.
  *
@@ -725,7 +725,7 @@ function validateSelectionItemFromService(item) {
 /**
  * Registers the handlers for the msssages received from the service.
  *
- * @since TBD
+ * @since 5.16.0
  *
  *
  * @param {HTMLElement} iframe The service iframe element to listen to.
@@ -747,7 +747,7 @@ function registerActions(iframe) {
 /**
  * Watches for click events on the sidebar arrow to toggle it up and down
  *
- * @since TBD
+ * @since 5.16.0
  *
  *
  * @param {HTMLElement} dom The dom or document
@@ -765,7 +765,7 @@ function toggleMobileSidebarOpen(dom) {
 /**
  * Setups up the mobile version of the ticket drawer and iframe.
  *
- * @since TBD
+ * @since 5.16.0
  *
  *
  * @param {HTMLElement} dom The dom or document
@@ -790,7 +790,7 @@ function setupMobileTicketsDrawer(dom) {
 /**
  * Bootstraps the service iframe starting the communication with the service.
  *
- * @since TBd
+ * @since 5.16.0
  *
  * @param {HTMLDocument|null} dom The document to use to bootstrap the iframe.
  *
@@ -803,7 +803,7 @@ function bootstrapIframe(_x2) {
 /**
  * Prompts the backend to cancel the reservations.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {Promise<boolean>} A promise that resolves to `true` if the reservations were removed successfully,
  *                            `false` otherwise.
@@ -819,7 +819,13 @@ function _bootstrapIframe() {
 
     // Register the actions before initializing the iframe to avoid race conditions.
     registerActions(iframe);
-    yield Object(external_tec_tickets_seating_service_iframe_["initServiceIframe"])(iframe);
+    try {
+      yield Object(external_tec_tickets_seating_service_iframe_["initServiceIframe"])(iframe);
+    } catch (err) {
+      // Reload the page: the server will render a tickets block explaining what is happening.
+      window.location.reload();
+      return false;
+    }
     toggleMobileSidebarOpen(dom);
     setupMobileTicketsDrawer(dom);
     totalPriceElement = dom.querySelector('.tec-tickets-seating__total-price');
@@ -834,7 +840,7 @@ function cancelReservationsOnBackend() {
 /**
  * Clears the ticket selection from the DOM.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {void} The ticket selection is cleared.
  */
@@ -870,7 +876,7 @@ function clearTicketSelection() {
 /**
  * Dispatches a clear reservations message to the service through the iframe.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLElement|null} dialogElement The dialog element the iframe element that should be used to communicate with the service.
  */
@@ -881,7 +887,7 @@ function cancelReservations(_x3) {
 /**
  * Closes the modal element using its reference on the window object.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {void} The modal is closed.
  */
@@ -919,7 +925,7 @@ function closeModal() {
 /**
  * Reads and compiles a list of the selected tickets from the DOM
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {SelectedTicket[]} A list of the selected tickets.
  */
@@ -946,7 +952,7 @@ function readTicketsFromSelection() {
 /**
  * Proceeds to the checkout phase according to the provider.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {Promise<void>} A promise that resolves to void. Note that, most likely, the checkout will redirect to the
  *                          provider's checkout page.
@@ -957,7 +963,7 @@ function proceedToCheckout() {
 /**
  * Append the expire date to the iframe src.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {A11yDialog} dialogElement The A11y dialog element.
  */
@@ -1001,7 +1007,7 @@ function setExpireDate(dialogElement) {
 /**
  * Adds event listeners to the modal element once it's loaded.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {void} Adds event listeners to the modal element once it's loaded.
  */

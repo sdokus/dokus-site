@@ -2,32 +2,34 @@
 /**
  * The main Editor controller, for both Classic and Blocks.
  *
- * @since   TBD
+ * @since   5.16.0
  *
  * @package TEC\Controller;
  */
 
 namespace TEC\Tickets\Seating;
 
-use TEC\Common\StellarWP\Assets\Asset;
+use TEC\Common\Asset;
 use TEC\Common\StellarWP\Assets\Assets;
 use TEC\Tickets\Seating\Service\Service;
 use Tribe__Tickets__Main as Tickets;
+use TEC\Tickets\Commerce\Ticket;
+use Tribe__Tickets__Tickets as Tribe_Tickets;
+use WP_Post;
+use WP_REST_Request;
 
 /**
  * Class Editor.
  *
- * @since   TBD
+ * @since   5.16.0
  *
  * @package TEC\Controller;
  */
 class Editor extends \TEC\Common\Contracts\Provider\Controller {
-	use Built_Assets;
-
 	/**
 	 * Unregisters the Controller by unsubscribing from WordPress hooks.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
@@ -36,12 +38,13 @@ class Editor extends \TEC\Common\Contracts\Provider\Controller {
 		$assets->remove( 'tec-tickets-seating-block-editor' );
 		remove_action( 'init', [ $this, 'register_meta' ], 1000 );
 		remove_action( 'tribe_tickets_ticket_added', [ $this, 'save_ticket_seat_type' ] );
+		remove_filter( 'tribe_rest_single_ticket_data', [ $this, 'filter_seating_totals' ], 20 );
 	}
 
 	/**
 	 * Returns the store data used to hydrate the store in Block Editor context.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return array{
 	 *     isUsingAssignedSeating: bool,
@@ -55,7 +58,7 @@ class Editor extends \TEC\Common\Contracts\Provider\Controller {
 	 */
 	public function get_store_data(): array {
 		if ( tribe_context()->is_new_post() ) {
-			// New posts will always use assigned seating.
+			// New posts will always use assigned seating as long as license exists.
 			$is_using_assigned_seating = true;
 			$layout_id                 = null;
 			$seat_types_by_post_id     = [];
@@ -83,7 +86,8 @@ class Editor extends \TEC\Common\Contracts\Provider\Controller {
 		$service_status = $service->get_status();
 
 		return [
-			'isUsingAssignedSeating' => $is_using_assigned_seating,
+			// isUsingAssignedSeating should never be true when there is no license. The ASC controls are hidden when no license is there.
+			'isUsingAssignedSeating' => ! $service_status->has_no_license() && $is_using_assigned_seating,
 			'layouts'                => $service->get_layouts_in_option_format(),
 			'seatTypes'              => $layout_id ? $service->get_seat_types_by_layout( $layout_id ) : [],
 			'currentLayoutId'        => $layout_id,
@@ -101,7 +105,7 @@ class Editor extends \TEC\Common\Contracts\Provider\Controller {
 	/**
 	 * Registers the meta for the Tickets and the ticketable post types.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 */
 	public function register_meta(): void {
 		foreach ( tribe_tickets()->ticket_types() as $ticket_type ) {
@@ -147,7 +151,7 @@ class Editor extends \TEC\Common\Contracts\Provider\Controller {
 	/**
 	 * Registers the controller by subscribing to WordPress hooks and binding implementations.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
@@ -155,21 +159,60 @@ class Editor extends \TEC\Common\Contracts\Provider\Controller {
 		$this->register_block_editor_assets();
 		add_action( 'init', [ $this, 'register_meta' ], 1000 );
 		add_action( 'tribe_tickets_ticket_added', [ $this, 'save_ticket_seat_type' ], 10, 3 );
+		// Priority is important to be above 10!
+		add_filter( 'tribe_rest_single_ticket_data', [ $this, 'filter_seating_totals' ], 20, 2 );
+	}
+
+	/**
+	 * Filters the seating totals during a rest request.
+	 *
+	 * @since 5.16.0
+	 *
+	 * @param array           $data    The data to be shared with the block editor.
+	 * @param WP_REST_Request $request The block editor's request.
+	 *
+	 * @return array The filtered totals.
+	 */
+	public function filter_seating_totals( array $data, WP_REST_Request $request ): array {
+		$ticket_id = $request['id'] ?? false;
+
+		if ( ! $ticket_id ) {
+			return $data;
+		}
+
+		$ticket_object = Tribe_Tickets::load_ticket_object( $ticket_id );
+
+		$event_id = get_post_meta( $ticket_id, Ticket::$event_relation_meta_key, true );
+
+		if ( ! ( $ticket_object && $event_id && tec_tickets_seating_enabled( $event_id ) ) ) {
+			return $data;
+		}
+
+		$data['totals'] = array_merge(
+			$data['totals'],
+			[
+				'stock' => $ticket_object->stock(),
+			]
+		);
+
+		return $data;
 	}
 
 	/**
 	 * Registers the Block Editor JavaScript and CSS assets.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
 	private function register_block_editor_assets(): void {
 		Asset::add(
 			'tec-tickets-seating-block-editor',
-			$this->built_asset_url( 'blockEditor.js' ),
+			'blockEditor.js',
 			Tickets::VERSION
 		)
+			->add_to_group_path( 'tec-seating' )
+			->set_condition( [ $this, 'should_enqueue_assets' ] )
 			->set_dependencies(
 				'wp-hooks',
 				'react',
@@ -194,9 +237,11 @@ class Editor extends \TEC\Common\Contracts\Provider\Controller {
 
 		Asset::add(
 			'tec-tickets-seating-block-editor-style',
-			$this->built_asset_url( 'blockEditor.css' ),
+			'blockEditor.css',
 			Tickets::VERSION
 		)
+			->add_to_group_path( 'tec-seating' )
+			->set_condition( [ $this, 'should_enqueue_assets' ] )
 			->enqueue_on( 'enqueue_block_editor_assets' )
 			->add_to_group( 'tec-tickets-seating-editor' )
 			->add_to_group( 'tec-tickets-seating' )
@@ -204,9 +249,33 @@ class Editor extends \TEC\Common\Contracts\Provider\Controller {
 	}
 
 	/**
+	 * Checks if the current context is the Block Editor and the post type is ticket-enabled.
+	 *
+	 * @since 5.17.0
+	 *
+	 * @return bool Whether the assets should be enqueued or not.
+	 */
+	public function should_enqueue_assets() {
+		$ticketable_post_types = (array) tribe_get_option( 'ticket-enabled-post-types', [] );
+
+		if ( empty( $ticketable_post_types ) ) {
+			return false;
+		}
+
+		$post = get_post();
+
+		if ( ! $post instanceof WP_Post ) {
+			return false;
+		}
+
+		return is_admin()
+				&& in_array( $post->post_type, $ticketable_post_types, true );
+	}
+
+	/**
 	 * Saves the seating details of a ticket from the POST or PUT request data sent to the REST API.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param int                 $post_id   The ID of the post the ticket is attached to.
 	 * @param int                 $ticket_id The ID of the ticket.

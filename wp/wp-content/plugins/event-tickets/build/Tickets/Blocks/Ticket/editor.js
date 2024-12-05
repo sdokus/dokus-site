@@ -525,7 +525,7 @@ const TicketContainerHeader = _ref => {
   /**
    * Filter the header details of the ticket.
    *
-   * @since TBD
+   * @since 5.16.0
    *
    * @param {Array}  items    The header details of the ticket.
    * @param {string} clientId The client ID of the ticket block.
@@ -760,7 +760,7 @@ class template_Capacity extends external_React_["PureComponent"] {
      * By default, the function to render the form is the one used to render the
      * capacity form depending on Event Tickets Plus being active or not.
      *
-     * @since TBD
+     * @since 5.16.0
      *
      * @param {Function} renderForm The function used to render the capacity form.
      * @param {Object}   props      The props used to render the Capacity component.
@@ -792,7 +792,8 @@ defineProperty_default()(template_Capacity, "propTypes", {
   onTempCapacityChange: external_tribe_modules_propTypes_default.a.func,
   onTempCapacityNoPlusChange: external_tribe_modules_propTypes_default.a.func,
   onTempCapacityTypeChange: external_tribe_modules_propTypes_default.a.func,
-  onTempSharedCapacityChange: external_tribe_modules_propTypes_default.a.func
+  onTempSharedCapacityChange: external_tribe_modules_propTypes_default.a.func,
+  ticketProvider: external_tribe_modules_propTypes_default.a.string
 });
 /* harmony default export */ var capacity_template = (template_Capacity);
 // EXTERNAL MODULE: external "tribe.common.data"
@@ -825,7 +826,8 @@ const capacity_container_mapStateToProps = (state, ownProps) => ({
   tempCapacity: ticket["f" /* selectors */].getTicketTempCapacity(state, ownProps),
   tempCapacityType: ticket["f" /* selectors */].getTicketTempCapacityType(state, ownProps),
   tempCapacityTypeOption: ticket["f" /* selectors */].getTicketTempCapacityTypeOption(state, ownProps),
-  tempSharedCapacity: ticket["f" /* selectors */].getTicketsTempSharedCapacity(state)
+  tempSharedCapacity: ticket["f" /* selectors */].getTicketsTempSharedCapacity(state),
+  ticketProvider: ticket["f" /* selectors */].getTicketsProvider(state)
 });
 const capacity_container_mapDispatchToProps = (dispatch, ownProps) => {
   const {
@@ -2641,7 +2643,7 @@ const MoveDelete = _ref3 => {
   /**
    * Filters the items to be added to the move/delete section.
    *
-   * @since TBD
+   * @since 5.16.0
    *
    * @param {object[]} actions An array of action objects.
    * @param {number} clientId The client ID of the ticket block.
@@ -2785,7 +2787,7 @@ function dashboard_container_objectSpread(target) { for (var i = 1; i < argument
 /**
  * Whether the confirm button should be disabled.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Object} state    The state of the store.
  * @param {Object} ownProps The own props of the component.
@@ -2798,7 +2800,7 @@ const getIsConfirmDisabled = (state, ownProps) => {
   /**
    * Filters whether the confirm button should be disabled.
    *
-   * @since TBD
+   * @since 5.16.0
    *
    * @param {boolean} isDisabled Whether the button is disabled.
    * @param {Object}  state      The state of the store.
@@ -2913,7 +2915,7 @@ class template_Ticket extends external_React_["PureComponent"] {
      * Filters the ticket `isSelected` property. The property comes fron the Block Editor,
      * and it's a proxy to many of the interactivity properties of the ticket.
      *
-     * @since TBD
+     * @since 5.16.0
      *
      * @param {boolean} isSelected The ticket `isSelected` property.
      * @param {Object}  props      The Ticket component props.
@@ -6321,7 +6323,7 @@ function* setBodyDetails(clientId) {
    * Fires after the body details have been set and before the request is sent.
    * The action will fire both when a ticket is being created and when an existing ticket is being updated.
    *
-   * @since TBD
+   * @since 5.16.0
    * @param {Object} body The body of the request.
    * @param {string} clientId The client ID of the ticket block that is being created or updated.
    */
@@ -6520,7 +6522,7 @@ function* createNewTicket(action) {
       /**
        * Fires after the ticket has been created.
        *
-       * @since TBD
+       * @since 5.16.0
        * @param {string} clientId The ticket's client ID.
        */
       Object(external_wp_hooks_["doAction"])('tec.tickets.blocks.ticketCreated', clientId);
@@ -6619,7 +6621,7 @@ function* updateTicket(action) {
       /**
        * Fires after the ticket has been updated.
        *
-       * @since TBD
+       * @since 5.16.0
        * @param {string} clientId The ticket's client ID.
        */
       Object(external_wp_hooks_["doAction"])('tec.tickets.blocks.ticketUpdated', clientId);

@@ -3239,7 +3239,7 @@ function* setBodyDetails(clientId) {
    * Fires after the body details have been set and before the request is sent.
    * The action will fire both when a ticket is being created and when an existing ticket is being updated.
    *
-   * @since TBD
+   * @since 5.16.0
    * @param {Object} body The body of the request.
    * @param {string} clientId The client ID of the ticket block that is being created or updated.
    */
@@ -3438,7 +3438,7 @@ function* createNewTicket(action) {
       /**
        * Fires after the ticket has been created.
        *
-       * @since TBD
+       * @since 5.16.0
        * @param {string} clientId The ticket's client ID.
        */
       Object(external_wp_hooks_["doAction"])('tec.tickets.blocks.ticketCreated', clientId);
@@ -3537,7 +3537,7 @@ function* updateTicket(action) {
       /**
        * Fires after the ticket has been updated.
        *
-       * @since TBD
+       * @since 5.16.0
        * @param {string} clientId The ticket's client ID.
        */
       Object(external_wp_hooks_["doAction"])('tec.tickets.blocks.ticketUpdated', clientId);
@@ -8670,25 +8670,57 @@ var constants = __webpack_require__("DOwB");
 
 
 
+
+/**
+ * Dispatches an action to the common store.
+ *
+ * @since 5.16.0
+ *
+ * @param {Object} action The action to dispatch.
+ */
 function dispatchToCommonStore(action) {
   window.__tribe_common_store__.dispatch(action);
 }
+
+/**
+ * Selects from the common store.
+ *
+ * @since 5.16.0
+ *
+ * @param {string} selector The common store selector function to call.
+ * @param {...*}   args     The arguments to call the common store selector with.
+ *
+ * @return {*} The result of the common store selector.
+ */
 function selectFromCommonStore(selector) {
   for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
     args[_key - 1] = arguments[_key];
   }
   return selector(window.__tribe_common_store__.getState(), ...args);
 }
-function setTicketsSharedCapacityInCommonStore(capacity, clientId) {
+
+/**
+ * Sets the shared capacity in the common store.
+ *
+ * @since 5.16.0
+ *
+ * @param {string} clientId The client ID of Ticket block to set the capacity for.
+ * @param {number} capacity The capacity to set.
+ */
+function setTicketsSharedCapacityInCommonStore(clientId, capacity) {
   dispatchToCommonStore(Object(ticket_actions["setTicketsSharedCapacity"])(capacity));
   dispatchToCommonStore(Object(ticket_actions["setTicketsTempSharedCapacity"])(capacity));
   setTicketHasChangesInCommonStore(clientId);
 }
-function getTicketIdFromCommonStore(clientId) {
-  return selectFromCommonStore(selectors["getTicketId"], {
-    clientId
-  });
-}
+
+/**
+ * Sets the capacity in the common store.
+ *
+ * @since 5.16.0
+ *
+ * @param {string} clientId The client ID of the current ticket block.
+ * @param {number} capacity The capacity to set.
+ */
 function setCappedTicketCapacityInCommonStore(clientId, capacity) {
   dispatchToCommonStore(Object(ticket_actions["setTicketCapacity"])(clientId, capacity));
   dispatchToCommonStore(Object(ticket_actions["setTicketTempCapacity"])(clientId, capacity));
@@ -8696,8 +8728,59 @@ function setCappedTicketCapacityInCommonStore(clientId, capacity) {
   dispatchToCommonStore(Object(ticket_actions["setTicketTempCapacityType"])(clientId, constants["CAPPED"]));
   setTicketHasChangesInCommonStore(clientId);
 }
+
+/**
+ * Sets the has changes flag in the common store.
+ *
+ * @since 5.16.0
+ *
+ * @param {string} clientId The client ID of the Ticket block to update.
+ */
 function setTicketHasChangesInCommonStore(clientId) {
   dispatchToCommonStore(Object(ticket_actions["setTicketHasChanges"])(clientId, true));
+}
+
+/**
+ * Returns the ticket post ID fetched from the common store.
+ *
+ * @since 5.16.0
+ *
+ * @param {string} clientId The client ID of the Ticket block to update.
+ *
+ * @return {string} The ticket ID.
+ */
+function getTicketIdFromCommonStore(clientId) {
+  return selectFromCommonStore(selectors["getTicketId"], {
+    clientId
+  });
+}
+
+/**
+ * Returns the shared capacity integer value fetched from the common store.
+ *
+ * @since 5.16.0
+ *
+ *
+ * @return {number} The current integer value of the shared capacity.
+ */
+function getTicketsSharedCapacityFromCommonStore() {
+  return selectFromCommonStore(selectors["getTicketsSharedCapacityInt"]);
+}
+
+/**
+ * Returns the current Ticket provider fetched from the Common store.
+ *
+ * @since 5.16.0
+ *
+ * @return {string} The current ticket Provider fetched from the Common store,
+ *                  or an empty string if the Ticket block client ID is not set.
+ */
+function getTicketProviderFromCommonStore() {
+  try {
+    return selectFromCommonStore(selectors["getTicketsProvider"]);
+  } catch (e) {
+    return '';
+  }
 }
 // EXTERNAL MODULE: ./node_modules/@babel/runtime/helpers/asyncToGenerator.js
 var asyncToGenerator = __webpack_require__("yXPU");
@@ -8720,7 +8803,7 @@ var external_tec_tickets_seating_ajax_ = __webpack_require__("lL5a");
 /**
  * Fetches seat types for a given layout ID.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} layoutId The layout ID to fetch seat types for.
  *
@@ -8754,11 +8837,30 @@ const controls = {
     return fetchSeatTypesByLayoutId(action.layoutId);
   }
 };
+// CONCATENATED MODULE: ./src/Tickets/Seating/app/blockEditor/store/compatibility.js
+
+
+/**
+ * Returns whether the current ticket provider supports Seating or not.
+ *
+ * This value cannot be read from data localized by the backend since the user
+ * will be able to change the ticket provider live, while the post, or Ticket,
+ * editing is happening.
+ *
+ * @since 5.16.0
+ *
+ * @return {boolean} Whether the current ticket provider supports seating or not.
+ */
+function currentProviderSupportsSeating() {
+  const provider = getTicketProviderFromCommonStore();
+  return 'TEC\\Tickets\\Commerce\\Module' === provider;
+}
 // CONCATENATED MODULE: ./src/Tickets/Seating/app/blockEditor/store/selectors.js
+
 
 const selectors_selectors = {
   isUsingAssignedSeating(state) {
-    return state.isUsingAssignedSeating;
+    return state.isUsingAssignedSeating && currentProviderSupportsSeating();
   },
   getLayouts(state) {
     return state.layouts;
@@ -8899,7 +9001,7 @@ const actions_actions = {
   }
 };
 // CONCATENATED MODULE: ./src/Tickets/Seating/app/blockEditor/store/localized-data.js
-var _window, _window$tec, _window$tec$tickets, _window$tec$tickets$s;
+var localized_data_window, _window$tec, _window$tec$tickets, _window$tec$tickets$s;
 /**
  * @typedef {'down'|'not-connected'|'invalid-license'} StatusString
  */
@@ -8926,7 +9028,7 @@ var _window, _window$tec, _window$tec$tickets, _window$tec$tickets$s;
 /**
  * @type {StoreLocalizedData}
  */
-const localizedData = (_window = window) === null || _window === void 0 ? void 0 : (_window$tec = _window.tec) === null || _window$tec === void 0 ? void 0 : (_window$tec$tickets = _window$tec.tickets) === null || _window$tec$tickets === void 0 ? void 0 : (_window$tec$tickets$s = _window$tec$tickets.seating) === null || _window$tec$tickets$s === void 0 ? void 0 : _window$tec$tickets$s.blockEditor;
+const localizedData = (localized_data_window = window) === null || localized_data_window === void 0 ? void 0 : (_window$tec = localized_data_window.tec) === null || _window$tec === void 0 ? void 0 : (_window$tec$tickets = _window$tec.tickets) === null || _window$tec$tickets === void 0 ? void 0 : (_window$tec$tickets$s = _window$tec$tickets.seating) === null || _window$tec$tickets$s === void 0 ? void 0 : _window$tec$tickets$s.blockEditor;
 // CONCATENATED MODULE: ./src/Tickets/Seating/app/blockEditor/store/index.js
 
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
@@ -9198,7 +9300,6 @@ const getMessage = (serviceStatus, serviceConnectUrl) => {
         rel: "noreferrer noopener"
       }, Object(external_wp_i18n_["_x"])('You need to connect your site to use assigned seating.', 'Connect to the Seating Builder link label', 'event-tickets')));
     case 'expired-license':
-    case 'invalid-license':
       return wp.element.createElement("span", {
         style: style
       }, Object(external_wp_i18n_["__"])('Your license for Seating has expired.', 'event-tickets'), ' ', wp.element.createElement("a", {
@@ -9207,6 +9308,21 @@ const getMessage = (serviceStatus, serviceConnectUrl) => {
         target: "_blank",
         rel: "noreferrer noopener"
       }, Object(external_wp_i18n_["_x"])('Renew your license to continue using Seating for Event Tickets.', 'link label for renewing the license', 'event-tickets')));
+    case 'invalid-license':
+      return wp.element.createElement("span", {
+        style: style
+      }, Object(external_wp_i18n_["__"])('Your license for Seating is invalid.', 'event-tickets'), ' ', wp.element.createElement("a", {
+        style: anchorStyle,
+        href: "https://evnt.is/1bdu",
+        target: "_blank",
+        rel: "noreferrer noopener"
+      }, Object(external_wp_i18n_["_x"])('Check your license key settings', 'link label for checking the license', 'event-tickets')), ' ', Object(external_wp_i18n_["__"])('or', 'event-tickets'), ' ', wp.element.createElement("a", {
+        style: anchorStyle,
+        href: "https://evnt.is/1be1",
+        target: "_blank",
+        rel: "noreferrer noopener"
+      }, Object(external_wp_i18n_["_x"])('log into your account.', 'link label for account login', 'event-tickets')));
+    case 'no-license':
     default:
       return '';
   }
@@ -9237,10 +9353,24 @@ ServiceError.propTypes = {
   serviceStatus: external_tribe_modules_propTypes_default.a.oneOf(['down', 'not-connected', 'invalid-license']).isRequired
 };
 /* harmony default export */ var service_error = (ServiceError);
+// EXTERNAL MODULE: ./src/modules/elements/index.js + 26 modules
+var modules_elements = __webpack_require__("jHzm");
+
+// CONCATENATED MODULE: ./src/Tickets/Seating/app/blockEditor/capacity-form/series-notice.js
+
+
+
+const SeriesNotice = () => {
+  return wp.element.createElement(external_React_["Fragment"], null, wp.element.createElement(modules_elements["Notice"], {
+    description: Object(external_wp_i18n_["__"])('Assigned seating is not yet supported for events that are in series.', 'event-tickets')
+  }));
+};
+/* harmony default export */ var series_notice = (SeriesNotice);
 // CONCATENATED MODULE: ./src/Tickets/Seating/app/blockEditor/capacity-form/index.js
 
 function capacity_form_ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function capacity_form_objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? capacity_form_ownKeys(Object(source), !0).forEach(function (key) { defineProperty_default()(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : capacity_form_ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
+
 
 
 
@@ -9347,7 +9477,7 @@ function CapacityForm(_ref) {
     setEventCapacity(layoutSeats);
     setTicketSeatType(clientId, null);
     setCappedTicketCapacityInCommonStore(clientId, 0);
-    setTicketsSharedCapacityInCommonStore(layoutSeats, clientId);
+    setTicketsSharedCapacityInCommonStore(clientId, layoutSeats);
   }, [getLayoutSeats, setEventCapacity, setLayout, updateEventMeta, clientId]);
   const onSeatTypeChange = Object(external_wp_element_["useCallback"])(choice => {
     const seatTypeSeats = getSeatTypeSeats(choice.value);
@@ -9355,6 +9485,11 @@ function CapacityForm(_ref) {
     setCappedTicketCapacityInCommonStore(clientId, seatTypeSeats);
   }, [getSeatTypeSeats, setTicketSeatType, clientId]);
   const renderLayoutSelect = () => {
+    var _window, _window$TECFtEditorDa, _window$TECFtEditorDa2;
+    const inSeries = ((_window = window) === null || _window === void 0 ? void 0 : (_window$TECFtEditorDa = _window.TECFtEditorData) === null || _window$TECFtEditorDa === void 0 ? void 0 : (_window$TECFtEditorDa2 = _window$TECFtEditorDa.event) === null || _window$TECFtEditorDa2 === void 0 ? void 0 : _window$TECFtEditorDa2.isInSeries) || false;
+    if (inSeries) {
+      return wp.element.createElement(series_notice, null);
+    }
     return isServiceStatusOk ? wp.element.createElement(MemoizedEventLayoutSelect, {
       layoutLocked: isLayoutLocked,
       layouts: layouts,
@@ -9389,9 +9524,6 @@ CapacityForm.propTypes = {
   renderDefaultForm: external_tribe_modules_propTypes_default.a.func.isRequired,
   ticketPostId: external_tribe_modules_propTypes_default.a.number.isRequired
 };
-// EXTERNAL MODULE: ./src/modules/elements/index.js + 26 modules
-var modules_elements = __webpack_require__("jHzm");
-
 // EXTERNAL MODULE: ./src/modules/icons/index.js + 19 modules
 var icons = __webpack_require__("NxMS");
 
@@ -9423,7 +9555,7 @@ const Seats = () => {
  * Filters the mapped props for the Capacity Table component.
  *
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Object} mappedProps The mapped props for the Capacity Table component.
  *
@@ -9488,7 +9620,7 @@ var settings_style = __webpack_require__("s4cZ");
 /**
  * Returns the string from the settings localization.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} key The key to get the string for.
  *
@@ -9499,7 +9631,7 @@ const layoutSelect_getString = key => Object(external_tec_tickets_seating_utils_
 /**
  * The layout select component.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Object} props The component props.
  */
@@ -9511,7 +9643,7 @@ const LayoutSelect = _ref => {
   /**
    * Gets the current layout option.
    *
-   * @since TBD
+   * @since 5.16.0
    *
    * @param {number} layoutId The layout ID.
    * @param {Array}  layouts  The layouts.
@@ -9525,7 +9657,7 @@ const LayoutSelect = _ref => {
   /**
    * The post ID.
    *
-   * @since TBD
+   * @since 5.16.0
    *
    * @type {number}
    */
@@ -9539,7 +9671,7 @@ const LayoutSelect = _ref => {
   /**
    * Handles the layout change.
    *
-   * @since TBD
+   * @since 5.16.0
    *
    * @param {Object} selectedLayout The selected layout.
    */
@@ -9554,7 +9686,7 @@ const LayoutSelect = _ref => {
   /**
    * Close the modal.
    *
-   * @since TBD
+   * @since 5.16.0
    */
   const closeModal = () => {
     setIsModalOpen(false);
@@ -9565,7 +9697,7 @@ const LayoutSelect = _ref => {
   /**
    * Handle Modal confirmation.
    *
-   * @since TBD
+   * @since 5.16.0
    */
   const handleModalConfirm = /*#__PURE__*/function () {
     var _ref2 = asyncToGenerator_default()(function* () {
@@ -9585,7 +9717,7 @@ const LayoutSelect = _ref => {
   /**
    * Save the new layout with changes.
    *
-   * @since TBD
+   * @since 5.16.0
    *
    * @return {Promise<boolean>}
    */
@@ -9595,7 +9727,7 @@ const LayoutSelect = _ref => {
   /**
    * Renders the no layouts message.
    *
-   * @since TBD
+   * @since 5.16.0
    */
   function _saveNewLayout() {
     _saveNewLayout = asyncToGenerator_default()(function* () {
@@ -9622,7 +9754,7 @@ const LayoutSelect = _ref => {
   /**
    * Renders the select dropdown for the layout.
    *
-   * @since TBD
+   * @since 5.16.0
    *
    * @return {JSX.Element|null}
    */
@@ -9742,12 +9874,13 @@ const Outage = () => {
 
 
 
+
 const setSeatTypeForTicket = clientId => Object(external_wp_data_["dispatch"])(storeName).setTicketSeatTypeByPostId(clientId);
 
 /**
  * Filters whether the ticket is ASC.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {boolean} isAsc    Whether ticket is ASC.
  * @param {number}  clientId The ticket ID.
@@ -9761,7 +9894,7 @@ const filterTicketIsAsc = (isAsc, clientId) => {
 /**
  * Filters the header details of the ticket to add the seating type name.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Array}  items    The header details of the ticket.
  * @param {string} clientId The client ID of the ticket block.
@@ -9799,7 +9932,7 @@ const filterHeaderDetails = (items, clientId) => {
 /**
  * Filters the body details of the ticket to add the seating details.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Object} body     The body of the request.
  * @param {string} clientId The client ID of the ticket block.
@@ -9829,7 +9962,7 @@ const filterSetBodyDetails = (body, clientId) => {
  * Modifies the properties mapped from the state for the Availability component to conform
  * to the Assigned Seating feature.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Object} mappedProps           The properties mapped from the state for the Availability component.
  * @param {number} mappedProps.total     The total capacity.
@@ -9868,7 +10001,7 @@ const filterSeatedTicketsAvailabilityMappedProps = mappedProps => {
 /**
  * Filters the settings fields to include the layout selection.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Array} fields The settings fields.
  *
@@ -9881,6 +10014,7 @@ const filterSettingsFields = fields => {
     case 'not-connected':
     case 'expired-license':
     case 'invalid-license':
+    case 'no-license':
       fields.push(wp.element.createElement(upsell, null));
       break;
     case 'down':
@@ -9901,7 +10035,7 @@ const filterSettingsFields = fields => {
 /**
  * Disables the confirm button in the ticket dashboard if the service is down.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {{isConfirmDisabled: boolean}} mappedProps The mapped props for the Tickets block.
  *
@@ -9922,7 +10056,7 @@ const disableConfirmInTicketDashboard = mappedProps => {
 /**
  * Removes all the actions from the ticket if the service is down.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Array} actions The current actions.
  *
@@ -9942,7 +10076,7 @@ const removeAllActionsFromTicket = actions => {
 /**
  * Disables the ticket selection if the service is down.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {boolean} isSelected Whether the ticket is selected or not.
  *
@@ -9962,7 +10096,7 @@ const disableTicketSelection = isSelected => {
 /**
  * Filters whether the confirm save button is disabled.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {boolean} isDisabled Whether the button is disabled.
  * @param {Object}  state      The state of the store.
@@ -9987,6 +10121,26 @@ const filterButtonIsDisabled = (isDisabled, state, ownProps) => {
   }
   return false;
 };
+
+/**
+ * Filters the shared capacity input component to return an uneditable number if the seating feature is enabled
+ * for the current post.
+ *
+ * @since 5.16.0
+ *
+ * @param {React.Node} sharedCapacityInput The shared capacity input component.
+ *
+ * @return {React.Node|number} The shared capacity input component if the seating feature is enabled for the current post,
+ *                              otherwise the shared capacity current value.
+ */
+function replaceSharedCapacityInput(sharedCapacityInput) {
+  const store = Object(external_wp_data_["select"])(storeName);
+  if (!store.isUsingAssignedSeating()) {
+    return sharedCapacityInput;
+  }
+  const sharedCapacity = getTicketsSharedCapacityFromCommonStore();
+  return sharedCapacity || 0;
+}
 // CONCATENATED MODULE: ./src/Tickets/Seating/app/blockEditor/filters.js
 
 
@@ -10002,14 +10156,24 @@ const shouldRenderAssignedSeatingForm = true;
  *
  * @param {function(): void} renderDefaultForm The render function of the Capacity form.k
  * @param {string }          clientId          The client ID of the ticket block.
+ * @param {string}           ticketProvider    The ticket provider.
  *
  * @return {Function} The render function of the Capacity form with the seating options.
  */
 function filterRenderCapacityForm(renderDefaultForm, _ref) {
   let {
-    clientId
+    clientId,
+    ticketProvider
   } = _ref;
   if (!shouldRenderAssignedSeatingForm) {
+    return renderDefaultForm;
+  }
+  if (ticketProvider !== "TEC\\Tickets\\Commerce\\Module" && ticketProvider !== 'tc') {
+    return renderDefaultForm;
+  }
+
+  // When no license, we DO NOT render the radios General vs Seating.
+  if ('no-license' === Object(external_wp_data_["select"])(storeName).getServiceStatus()) {
     return renderDefaultForm;
   }
   return () => wp.element.createElement(CapacityForm, {
@@ -10023,7 +10187,7 @@ Object(external_wp_hooks_["addFilter"])('tec.tickets.blocks.setBodyDetails', 'te
 /**
  * Filters the action items of the dashboard to add the seating actions.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Array}  actions  The action items of the dashboard.
  * @param {string} clientId The client ID of the ticket block.
@@ -10048,7 +10212,7 @@ Object(external_wp_hooks_["addFilter"])('tec.tickets.blocks.Tickets.TicketsDashb
 /**
  * Filters the ticket edit action items to remove the move button for seated tickets.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Object[]} actions  The action items of the ticket.
  * @param {string}   clientId The client ID of the ticket block.
@@ -10074,6 +10238,7 @@ Object(external_wp_hooks_["addFilter"])('tec.tickets.blocks.confirmButton.isDisa
 Object(external_wp_hooks_["addFilter"])('tec.tickets.blocks.Tickets.TicketsDashboardAction.mappedProps', 'tec.tickets.seating', disableConfirmInTicketDashboard);
 Object(external_wp_hooks_["addFilter"])('tec.tickets.blocks.Ticket.actionItems', 'tec.tickets.seating', removeAllActionsFromTicket);
 Object(external_wp_hooks_["addFilter"])('tec.tickets.blocks.Ticket.isSelected', 'tec.tickets.seating', disableTicketSelection);
+Object(external_wp_hooks_["addFilter"])('tec.tickets.blocks.Tickets.CapacityTable.sharedCapacityInput', 'tec.tickets.seating', replaceSharedCapacityInput);
 // CONCATENATED MODULE: ./src/Tickets/Seating/app/blockEditor/index.js
 
 

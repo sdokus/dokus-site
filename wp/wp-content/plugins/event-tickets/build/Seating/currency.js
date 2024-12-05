@@ -178,7 +178,7 @@ const {
 /**
  * Formats a value to a currency string not including the currency symbol.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {number} value The value to format.
  *
@@ -197,7 +197,7 @@ function formatValue(value) {
 /**
  * Formats a number with currency and symbol following the settings in the Tickets Commerce settings.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {number} value The value to format.
  *

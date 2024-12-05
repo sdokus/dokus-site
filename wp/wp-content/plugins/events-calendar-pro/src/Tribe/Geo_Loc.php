@@ -132,7 +132,7 @@ class Tribe__Events__Pro__Geo_Loc { // phpcs:ignore -- legacy class name
 		add_action( 'admin_init', [ $this, 'maybe_generate_geopoints_for_all_venues' ] );
 		add_action( 'admin_init', [ $this, 'maybe_offer_generate_geopoints' ] );
 		add_filter( 'tribe-events-bar-views', [ $this, 'setup_view_for_bar' ], 25, 1 );
-		add_filter( 'tribe_display_settings_maps_section', [ $this, 'inject_settings' ], 10 );
+		add_filter( 'tec_events_settings_display_maps_section', [ $this, 'inject_settings' ], 10 );
 		add_filter( 'tribe-events-bar-filters', [ $this, 'setup_geoloc_filter_in_bar' ], 1, 1 );
 
 		add_filter( 'tribe_events_rewrite_rules_custom', [ $this, 'add_routes' ], 10, 3 );
@@ -1398,7 +1398,7 @@ class Tribe__Events__Pro__Geo_Loc { // phpcs:ignore -- legacy class name
 				if ( in_array( 'route', $component->types, true ) ) {
 					$result['street'] = $component->long_name;
 				}
-				if ( in_array( 'number', $component->types, true ) ) {
+				if ( in_array( 'street_number', $component->types, true ) ) {
 					$result['number'] = $component->long_name;
 				}
 				if ( in_array( 'postal_code', $component->types, true ) ) {
@@ -1417,7 +1417,23 @@ class Tribe__Events__Pro__Geo_Loc { // phpcs:ignore -- legacy class name
 					$result['Country'] = $component->long_name;
 				}
 			}
-			$result['Address'] = ( $result['street'] ?? '' ) . ' ' . ( $result['number'] ?? '' );
+
+			/**
+			 * Allows changing the order of the street name and house number.
+			 *
+			 * @since 7.3.0
+			 *
+			 * @param string $address            The compiled address to be saved.
+			 * @param array  $result             Array of the address components to be saved.
+			 * @param object $address_components The address components received from the geocoding API.
+			 */
+			$result['Address'] = apply_filters(
+				'tec_events_pro_geolocation_address_format',
+				trim( ( $result['street'] ?? '' ) . ' ' . ( $result['number'] ?? '' ) ),
+				$result,
+				$geo_result->address_components
+			);
+
 			unset( $result['street'], $result['number'] );
 		}
 
@@ -1491,7 +1507,7 @@ class Tribe__Events__Pro__Geo_Loc { // phpcs:ignore -- legacy class name
 	 * If there are venues without geo data, offer the user to fix them.
 	 */
 	public function show_offer_to_fix_notice() {
-		$url = tribe( 'tec.main' )->settings()->get_url( [ 'tab' => 'display' ] );
+		$url = tribe( 'tec.main' )->settings()->get_url( [ 'tab' => 'display-maps-tab' ] );
 
 		?>
 		<div class="updated">
@@ -1578,7 +1594,7 @@ class Tribe__Events__Pro__Geo_Loc { // phpcs:ignore -- legacy class name
 		}
 
 		// For back-compatibility purposes let's remove this.
-		delete_option( '_tribe_geoloc_fixed', 1 );
+		delete_option( '_tribe_geoloc_fixed' );
 
 		// Let's remove the note that fixes are needed.
 		delete_transient( '_tribe_geoloc_fix_needed' );

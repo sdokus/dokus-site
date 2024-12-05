@@ -2,9 +2,9 @@
 /**
  * Template to render a Layout card.
  *
- * @since TBD
+ * @since 5.16.0
  *
- * @version TBD
+ * @version 5.16.0
  *
  * @var Layout_Card $card The Layout card to render.
  */
@@ -31,13 +31,13 @@ use TEC\Tickets\Seating\Admin\Tabs\Layout_Card;
 					_n( '%d associated event', '%d associated events', $count, 'event-tickets' ),
 					$count,
 				);
-				
+
 				$link_html = sprintf(
 					'<a href="%s" target="_blank" rel="noopener noreferrer">%s</a>',
 					esc_url( $card->get_associated_posts_url() ),
 					esc_html( $link_label )
 				);
-				
+
 				echo wp_kses(
 					$link_html,
 					[
@@ -58,6 +58,12 @@ use TEC\Tickets\Seating\Admin\Tabs\Layout_Card;
 				data-event-count="<?php echo esc_attr( $count ); ?>">
 				<?php esc_html_e( 'Edit', 'event-tickets' ); ?>
 			</a>
+			<button
+				class="button button-secondary duplicate-layout"
+				data-layout-id="<?php echo esc_attr( $card->get_id() ); ?>"
+			>
+				<?php esc_html_e( 'Duplicate', 'event-tickets' ); ?>
+			</button>
 			<?php if ( 0 === $count ) : ?>
 			<a
 				class="delete-layout"

@@ -65,6 +65,7 @@ class Capacity extends PureComponent {
 		onTempCapacityNoPlusChange: PropTypes.func,
 		onTempCapacityTypeChange: PropTypes.func,
 		onTempSharedCapacityChange: PropTypes.func,
+		ticketProvider: PropTypes.string,
 	};
 
 	constructor( props ) {
@@ -238,7 +239,7 @@ class Capacity extends PureComponent {
 		 * By default, the function to render the form is the one used to render the
 		 * capacity form depending on Event Tickets Plus being active or not.
 		 *
-		 * @since TBD
+		 * @since 5.16.0
 		 *
 		 * @param {Function} renderForm The function used to render the capacity form.
 		 * @param {Object}   props      The props used to render the Capacity component.

@@ -2,7 +2,7 @@
 /**
  * The main Admin area controller.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @package TEC\Controller;
  */
@@ -11,7 +11,7 @@ namespace TEC\Tickets\Seating;
 
 use TEC\Common\Contracts\Provider\Controller as Controller_Contract;
 use TEC\Common\lucatume\DI52\Container;
-use TEC\Common\StellarWP\Assets\Asset;
+use TEC\Common\Asset;
 use TEC\Common\StellarWP\Assets\Assets;
 use TEC\Tickets\Seating\Admin\Tabs\Layout_Edit;
 use TEC\Tickets\Seating\Admin\Tabs\Layouts;
@@ -26,17 +26,15 @@ use WP_Post;
 /**
  * Class Admin.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @package TEC\Controller\Admin;
  */
 class Admin extends Controller_Contract {
-	use Built_Assets;
-
 	/**
 	 * A reference to the object representing the service.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var Service
 	 */
@@ -45,7 +43,7 @@ class Admin extends Controller_Contract {
 	/**
 	 * Admin constructor.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param Container $container A reference to the container object.
 	 * @param Service   $service   A reference to the service object.
@@ -58,7 +56,7 @@ class Admin extends Controller_Contract {
 	/**
 	 * Unhooks on the required hooks.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
@@ -73,7 +71,7 @@ class Admin extends Controller_Contract {
 		$assets->remove( 'tec-tickets-seating-admin-layout-edit' );
 		$assets->remove( 'tec-tickets-seating-admin-layout-edit-style' );
 
-		remove_action( 'admin_menu', [ $this, 'add_submenu_page' ], 1000 );
+		remove_action( 'admin_menu', [ $this, 'add_submenu_page' ], 15 );
 		remove_action( 'admin_init', [ $this, 'register_woo_incompatibility_notice' ] );
 		remove_filter( 'tec_tickets_find_ticket_type_host_posts_query_args', [ $this, 'exclude_asc_events_from_candidates_from_moving_tickets_to' ] );
 
@@ -85,7 +83,7 @@ class Admin extends Controller_Contract {
 	/**
 	 * Whether this Controller should be active or not.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return bool Whether the controller should be active or not.
 	 */
@@ -96,25 +94,35 @@ class Admin extends Controller_Contract {
 	/**
 	 * Adds the seating management page under "Tickets" in the admin menu.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void The seating management page link is added to the admin menu.
 	 */
 	public function add_submenu_page(): void {
-		add_submenu_page(
-			'tec-tickets',
-			__( 'Seating', 'event-tickets' ),
-			__( 'Seating', 'event-tickets' ),
-			'manage_options',
-			self::get_menu_slug(),
-			$this->container->callback( Admin\Maps_Layouts_Home_Page::class, 'render' )
+		// Don't add the submenu page if there is no license for seating.
+		if ( $this->service->get_status()->has_no_license() ) {
+			return;
+		}
+
+		/** @var \Tribe\Admin\Pages */
+		$admin_pages = tribe( 'admin.pages' );
+
+		$admin_pages->register_page(
+			[
+				'id'       => self::get_menu_slug(),
+				'parent'   => 'tec-tickets',
+				'title'    => __( 'Seating', 'event-tickets' ),
+				'path'     => self::get_menu_slug(),
+				'position' => 4,
+				'callback' => $this->container->callback( Admin\Maps_Layouts_Home_Page::class, 'render' ),
+			]
 		);
 	}
 
 	/**
 	 * Returns the submenu page slug.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return string The slug of the submenu page.
 	 */
@@ -125,7 +133,7 @@ class Admin extends Controller_Contract {
 	/**
 	 * Register the admin area bindings and hooks on the required hooks.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
@@ -142,7 +150,7 @@ class Admin extends Controller_Contract {
 		$this->register_map_edit_assets();
 		$this->reqister_layout_edit_assets();
 
-		add_action( 'admin_menu', [ $this, 'add_submenu_page' ], 1000 );
+		add_action( 'admin_menu', [ $this, 'add_submenu_page' ], 15 );
 		add_action( 'admin_init', [ $this, 'register_woo_incompatibility_notice' ] );
 		add_filter( 'tec_tickets_find_ticket_type_host_posts_query_args', [ $this, 'exclude_asc_events_from_candidates_from_moving_tickets_to' ] );
 
@@ -154,7 +162,7 @@ class Admin extends Controller_Contract {
 	/**
 	 * Updates the duplicated tickets and produces a new UUID for the duplicated post.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array $duplicated_ticket_ids  The duplicated ticket IDs.
 	 * @param int   $new_post_id            The new post ID.
@@ -189,7 +197,7 @@ class Admin extends Controller_Contract {
 	/**
 	 * Duplicates the seating meta data.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array   $meta   The meta data to duplicate.
 	 * @param WP_Post $post The post object.
@@ -213,7 +221,7 @@ class Admin extends Controller_Contract {
 	/**
 	 * Excludes ASC events from the candidates to move tickets to.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array $query_args The query arguments.
 	 *
@@ -247,7 +255,7 @@ class Admin extends Controller_Contract {
 	/**
 	 * Registers Seating incompatibility notice with WooCommerce.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void The notice is registered.
 	 */
@@ -294,7 +302,7 @@ class Admin extends Controller_Contract {
 	/**
 	 * Registers the assets used by the Seating Maps tab.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void The assets are registered.
 	 */
@@ -302,9 +310,10 @@ class Admin extends Controller_Contract {
 		$action = 'tec_tickets_seating_tab_' . Maps::get_id();
 		Asset::add(
 			'tec-tickets-seating-admin-maps',
-			$this->built_asset_url( 'admin/maps.js' ),
+			'admin/maps.js',
 			Tickets::VERSION
 		)
+			->add_to_group_path( 'tec-seating' )
 			->add_dependency( 'tec-tickets-seating-service-bundle' )
 			->add_to_group( 'tec-tickets-seating-admin' )
 			->add_to_group( 'tec-tickets-seating' )
@@ -313,9 +322,10 @@ class Admin extends Controller_Contract {
 
 		Asset::add(
 			'tec-tickets-seating-admin-maps-style',
-			$this->built_asset_url( 'admin/maps.css' ),
+			'admin/maps.css',
 			Tickets::VERSION
 		)
+			->add_to_group_path( 'tec-seating' )
 			->add_to_group( 'tec-tickets-seating-admin' )
 			->add_to_group( 'tec-tickets-seating' )
 			->enqueue_on( $action )
@@ -325,7 +335,7 @@ class Admin extends Controller_Contract {
 	/**
 	 * Registers the assets used by the Seat Layouts tab.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void The assets are registered.
 	 */
@@ -337,9 +347,10 @@ class Admin extends Controller_Contract {
 
 		Asset::add(
 			'tec-tickets-seating-admin-layouts',
-			$this->built_asset_url( 'admin/layouts.js' ),
+			'admin/layouts.js',
 			Tickets::VERSION
 		)
+			->add_to_group_path( 'tec-seating' )
 			->set_dependencies( 'tec-tickets-seating-service-bundle', 'tribe-dialog-js' )
 			->add_localize_script( 'tec.tickets.seating.layouts', $data )
 			->add_to_group( 'tec-tickets-seating-admin' )
@@ -349,9 +360,10 @@ class Admin extends Controller_Contract {
 
 		Asset::add(
 			'tec-tickets-seating-admin-layouts-style',
-			$this->built_asset_url( 'admin/layouts.css' ),
+			'admin/layouts.css',
 			Tickets::VERSION
 		)
+			->add_to_group_path( 'tec-seating' )
 			->set_dependencies( 'tribe-dialog' )
 			->add_to_group( 'tec-tickets-seating-admin' )
 			->add_to_group( 'tec-tickets-seating' )
@@ -362,7 +374,7 @@ class Admin extends Controller_Contract {
 	/**
 	 * Registers the assets used by the Controller Map edit page.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void The assets are registered.
 	 */
@@ -370,9 +382,10 @@ class Admin extends Controller_Contract {
 		$action = 'tec_tickets_seating_tab_' . Map_Edit::get_id();
 		Asset::add(
 			'tec-tickets-seating-admin-map-edit',
-			$this->built_asset_url( 'admin/mapEdit.js' ),
+			'admin/mapEdit.js',
 			Tickets::VERSION
 		)
+			->add_to_group_path( 'tec-seating' )
 			->add_dependency( 'tec-tickets-seating-service-bundle' )
 			->enqueue_on( $action )
 			->add_to_group( 'tec-tickets-seating-admin' )
@@ -381,9 +394,10 @@ class Admin extends Controller_Contract {
 
 		Asset::add(
 			'tec-tickets-seating-admin-map-edit-style',
-			$this->built_asset_url( 'admin/mapEdit.css' ),
+			'admin/mapEdit.css',
 			Tickets::VERSION
 		)
+			->add_to_group_path( 'tec-seating' )
 			->add_to_group( 'tec-tickets-seating-admin' )
 			->add_to_group( 'tec-tickets-seating' )
 			->enqueue_on( $action )
@@ -394,7 +408,7 @@ class Admin extends Controller_Contract {
 	/**
 	 * Registers the assets used by the Seat Layout edit page.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void The assets are registered.
 	 */
@@ -402,9 +416,10 @@ class Admin extends Controller_Contract {
 		$action = 'tec_tickets_seating_tab_' . Layout_Edit::get_id();
 		Asset::add(
 			'tec-tickets-seating-admin-layout-edit',
-			$this->built_asset_url( 'admin/layoutEdit.js' ),
+			'admin/layoutEdit.js',
 			Tickets::VERSION
 		)
+			->add_to_group_path( 'tec-seating' )
 			->add_dependency( 'tec-tickets-seating-service-bundle' )
 			->enqueue_on( $action )
 			->add_to_group( 'tec-tickets-seating-admin' )
@@ -413,9 +428,10 @@ class Admin extends Controller_Contract {
 
 		Asset::add(
 			'tec-tickets-seating-admin-layout-edit-style',
-			$this->built_asset_url( 'admin/layoutEdit.css' ),
+			'admin/layoutEdit.css',
 			Tickets::VERSION
 		)
+			->add_to_group_path( 'tec-seating' )
 			->add_to_group( 'tec-tickets-seating-admin' )
 			->add_to_group( 'tec-tickets-seating' )
 			->enqueue_on( $action )

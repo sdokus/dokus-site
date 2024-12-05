@@ -4,6 +4,7 @@ import SeatType from './header/seat-type';
 import LayoutSelect from './settings/layoutSelect';
 import Upsell from './settings/upsell';
 import Outage from './settings/outage';
+import { getTicketsSharedCapacityFromCommonStore } from './store/common-store-bridge';
 
 export const setSeatTypeForTicket = (clientId) =>
 	dispatch(storeName).setTicketSeatTypeByPostId(clientId);
@@ -11,7 +12,7 @@ export const setSeatTypeForTicket = (clientId) =>
 /**
  * Filters whether the ticket is ASC.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {boolean} isAsc    Whether ticket is ASC.
  * @param {number}  clientId The ticket ID.
@@ -25,7 +26,7 @@ export const filterTicketIsAsc = (isAsc, clientId) => {
 /**
  * Filters the header details of the ticket to add the seating type name.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Array}  items    The header details of the ticket.
  * @param {string} clientId The client ID of the ticket block.
@@ -68,7 +69,7 @@ export const filterHeaderDetails = (items, clientId) => {
 /**
  * Filters the body details of the ticket to add the seating details.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Object} body     The body of the request.
  * @param {string} clientId The client ID of the ticket block.
@@ -101,7 +102,7 @@ export const filterSetBodyDetails = (body, clientId) => {
  * Modifies the properties mapped from the state for the Availability component to conform
  * to the Assigned Seating feature.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Object} mappedProps           The properties mapped from the state for the Availability component.
  * @param {number} mappedProps.total     The total capacity.
@@ -158,7 +159,7 @@ export const filterSeatedTicketsAvailabilityMappedProps = (mappedProps) => {
 /**
  * Filters the settings fields to include the layout selection.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Array} fields The settings fields.
  *
@@ -172,14 +173,11 @@ export const filterSettingsFields = (fields) => {
 		case 'not-connected':
 		case 'expired-license':
 		case 'invalid-license':
-			fields.push(
-				<Upsell />
-			);
+		case 'no-license':
+			fields.push(<Upsell />);
 			break;
 		case 'down':
-			fields.push(
-				<Outage />
-			);
+			fields.push(<Outage />);
 			break;
 		default:
 			const currentLayout = store.getCurrentLayoutId();
@@ -197,7 +195,7 @@ export const filterSettingsFields = (fields) => {
 /**
  * Disables the confirm button in the ticket dashboard if the service is down.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {{isConfirmDisabled: boolean}} mappedProps The mapped props for the Tickets block.
  *
@@ -222,7 +220,7 @@ export const disableConfirmInTicketDashboard = (mappedProps) => {
 /**
  * Removes all the actions from the ticket if the service is down.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Array} actions The current actions.
  *
@@ -245,7 +243,7 @@ export const removeAllActionsFromTicket = (actions) => {
 /**
  * Disables the ticket selection if the service is down.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {boolean} isSelected Whether the ticket is selected or not.
  *
@@ -268,7 +266,7 @@ export const disableTicketSelection = (isSelected) => {
 /**
  * Filters whether the confirm save button is disabled.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {boolean} isDisabled Whether the button is disabled.
  * @param {Object}  state      The state of the store.
@@ -298,3 +296,26 @@ export const filterButtonIsDisabled = (isDisabled, state, ownProps) => {
 
 	return false;
 };
+
+/**
+ * Filters the shared capacity input component to return an uneditable number if the seating feature is enabled
+ * for the current post.
+ *
+ * @since 5.16.0
+ *
+ * @param {React.Node} sharedCapacityInput The shared capacity input component.
+ *
+ * @return {React.Node|number} The shared capacity input component if the seating feature is enabled for the current post,
+ *                              otherwise the shared capacity current value.
+ */
+export function replaceSharedCapacityInput(sharedCapacityInput) {
+	const store = select(storeName);
+
+	if (!store.isUsingAssignedSeating()) {
+		return sharedCapacityInput;
+	}
+
+	const sharedCapacity = getTicketsSharedCapacityFromCommonStore();
+
+	return sharedCapacity || 0;
+}

@@ -2,19 +2,20 @@
 /**
  * The Seat Types table schema.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @package TEC\Controller\Tables;
  */
 
 namespace TEC\Tickets\Seating\Tables;
 
+use TEC\Common\StellarWP\DB\DB;
 use TEC\Common\StellarWP\Schema\Tables\Contracts\Table;
 
 /**
  * Class Seat_Types.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @package TEC\Controller\Tables;
  */
@@ -24,7 +25,7 @@ class Seat_Types extends Table {
 	/**
 	 * The schema version.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var string
 	 */
@@ -33,7 +34,7 @@ class Seat_Types extends Table {
 	/**
 	 * The base table name, without the table prefix.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var string
 	 */
@@ -42,7 +43,7 @@ class Seat_Types extends Table {
 	/**
 	 * The table group.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var string
 	 */
@@ -51,7 +52,7 @@ class Seat_Types extends Table {
 	/**
 	 * The slug used to identify the custom table.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var string
 	 */
@@ -60,17 +61,36 @@ class Seat_Types extends Table {
 	/**
 	 * The field that uniquely identifies a row in the table.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var string
 	 */
 	protected static $uid_column = 'id';
 
 	/**
+	 * Returns the number of seats for a given seat type.
+	 *
+	 * @since 5.16.0
+	 *
+	 * @param string $seat_type The seat type UUID to return the number of seats for.
+	 *
+	 * @return int The number of seats for the given seat type. If the seat type does not exist, returns `0`.
+	 */
+	public function get_seats( string $seat_type ): int {
+		return (int) DB::get_var(
+			DB::prepare(
+				'SELECT seats FROM %i WHERE id = %s',
+				self::table_name( true ),
+				$seat_type
+			)
+		);
+	}
+
+	/**
 	 * Returns the table creation SQL in the format supported
 	 * by the `dbDelta` function.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return string The table creation SQL, in the format supported
 	 *                by the `dbDelta` function.

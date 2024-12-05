@@ -45,7 +45,6 @@ const getMessage = (serviceStatus, serviceConnectUrl) => {
 				</span>
 			);
 		case 'expired-license':
-		case 'invalid-license':
 			return (
 				<span style={style}>
 					{__(
@@ -66,7 +65,44 @@ const getMessage = (serviceStatus, serviceConnectUrl) => {
 					</a>
 				</span>
 			);
+		case 'invalid-license':
+			return (
+				<span style={style}>
+					{__(
+						'Your license for Seating is invalid.',
+						'event-tickets'
+					)}{' '}
+					<a
+						style={anchorStyle}
+						href="https://evnt.is/1bdu"
+						target="_blank"
+						rel="noreferrer noopener"
+					>
+						{_x(
+							'Check your license key settings',
+							'link label for checking the license',
+							'event-tickets'
+						)}
+					</a>
+					{' '}{
+						__( 'or' , 'event-tickets' )
+					}{' '}
+					<a
+						style={anchorStyle}
+						href="https://evnt.is/1be1"
+						target="_blank"
+						rel="noreferrer noopener"
+					>
+						{_x(
+							'log into your account.',
+							'link label for account login',
+							'event-tickets'
+						)}
+					</a>
+				</span>
+			);
 
+		case 'no-license':
 		default:
 			return '';
 	}

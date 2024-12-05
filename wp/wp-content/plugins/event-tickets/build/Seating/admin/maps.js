@@ -199,34 +199,43 @@ function getString(key) {
 function registerDeleteAction(dom) {
   // Add click listener to all links with class 'delete'.
   dom.querySelectorAll('.delete-map').forEach(function (link) {
-    link.addEventListener('click', /*#__PURE__*/function () {
-      var _ref = asyncToGenerator_default()(function* (event) {
-        event.preventDefault();
-        yield handleDelete(event.target);
-      });
-      return function (_x) {
-        return _ref.apply(this, arguments);
-      };
-    }());
+    link.addEventListener('click', deleteListener);
   });
 }
 
 /**
+ * Bind the delete action.
+ *
+ * @since 5.17.0
+ *
+ * @param {Event} event The click event.
+ */
+function deleteListener(_x) {
+  return _deleteListener.apply(this, arguments);
+}
+/**
  * Handle delete action.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLElement} element - The target item.
  *
  * @return {Promise<void>}
  */
+function _deleteListener() {
+  _deleteListener = asyncToGenerator_default()(function* (event) {
+    event.preventDefault();
+    yield handleDelete(event.target);
+  });
+  return _deleteListener.apply(this, arguments);
+}
 function handleDelete(_x2) {
   return _handleDelete.apply(this, arguments);
 }
 /**
  * Delete map by ID.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} mapId - The map ID.
  *

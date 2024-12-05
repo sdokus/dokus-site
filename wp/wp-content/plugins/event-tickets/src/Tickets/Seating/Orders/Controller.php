@@ -2,7 +2,7 @@
 /**
  * The controller for the Seating Orders.
  *
- * @since   TBD
+ * @since   5.16.0
  *
  * @package TEC/Tickets/Seating/Orders
  */
@@ -11,13 +11,12 @@ namespace TEC\Tickets\Seating\Orders;
 
 use TEC\Common\Contracts\Provider\Controller as Controller_Contract;
 use TEC\Common\lucatume\DI52\Container;
-use TEC\Common\StellarWP\Assets\Asset;
+use TEC\Common\Asset;
 use TEC\Common\StellarWP\DB\DB;
 use TEC\Tickets\Admin\Attendees\Page as Attendee_Page;
 use TEC\Tickets\Commerce\Shortcodes\Checkout_Shortcode;
 use TEC\Tickets\Seating\Admin\Ajax;
 use TEC\Tickets\Seating\Ajax_Methods;
-use TEC\Tickets\Seating\Built_Assets;
 use TEC\Tickets\Seating\Frontend;
 use TEC\Tickets\Seating\Frontend\Session;
 use TEC\Tickets\Seating\Meta;
@@ -31,22 +30,22 @@ use Tribe__Tickets__Ticket_Object as Ticket_Object;
 use Tribe__Tickets__Tickets as Tickets;
 use WP_Post;
 use WP_Query;
+use TEC\Tickets\Commerce\Status\Status_Interface;
 
 /**
  * Class Controller
  *
- * @since   TBD
+ * @since   5.16.0
  *
  * @package TEC/Tickets/Seating/Orders
  */
 class Controller extends Controller_Contract {
-	use Built_Assets;
 	use Ajax_Methods;
 
 	/**
 	 * A reference to Attendee data handler
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var Attendee
 	 */
@@ -55,7 +54,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * A reference to Cart data handler
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var Cart
 	 */
@@ -64,7 +63,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * A reference to the seat selection session handler
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var Session
 	 */
@@ -87,7 +86,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * A reference to the Reservations object.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var Reservations
 	 */
@@ -96,7 +95,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Controller constructor.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param Container    $container    The DI container.
 	 * @param Attendee     $attendee     The Attendee data handler.
@@ -127,7 +126,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * The action that will be fired when this Controller registers.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
@@ -166,7 +165,11 @@ class Controller extends Controller_Contract {
 		// Attendee delete handler.
 		add_filter( 'tec_tickets_commerce_attendee_to_delete', [ $this, 'handle_attendee_delete' ] );
 
-		add_action( 'tec_tickets_commerce_flag_action_generated_attendees', [ $this, 'confirm_all_reservations' ] );
+		add_action( 'tec_tickets_commerce_flag_action_generated_attendees', [ $this, 'confirm_all_reservations' ], 10, 4 );
+		add_action(
+			'tec_tickets_commerce_order_status_flag_complete',
+			[ $this, 'confirm_all_reservations_on_completion' ]
+		);
 		add_action( 'wp_ajax_' . Ajax::ACTION_FETCH_ATTENDEES, [ $this, 'fetch_attendees_by_post' ] );
 		add_action( 'wp_ajax_' . Ajax::ACTION_RESERVATION_CREATED, [ $this, 'update_reservation' ] );
 		add_action( 'wp_ajax_' . Ajax::ACTION_RESERVATION_UPDATED, [ $this, 'update_reservation' ] );
@@ -192,6 +195,7 @@ class Controller extends Controller_Contract {
 			4
 		);
 		add_filter( 'pre_do_shortcode_tag', [ $this, 'filter_pre_do_shortcode_tag' ], 10, 4 );
+		add_filter( 'tec_tickets_attendees_page_render_context', [ $this, 'adjust_attendee_page_render_context_for_seating' ], 10, 3 );
 
 		$this->register_assets();
 	}
@@ -220,7 +224,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Unregisters all the hooks and implementations.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
@@ -247,6 +251,10 @@ class Controller extends Controller_Contract {
 		remove_filter( 'post_row_actions', [ $this, 'add_seats_row_action' ] );
 
 		remove_action( 'tec_tickets_commerce_flag_action_generated_attendees', [ $this, 'confirm_all_reservations' ] );
+		remove_action(
+			'tec_tickets_commerce_order_status_flag_complete',
+			[ $this, 'confirm_all_reservations_on_completion' ]
+		);
 		remove_action( 'wp_ajax_' . Ajax::ACTION_FETCH_ATTENDEES, [ $this, 'fetch_attendees_by_post' ] );
 		remove_action( 'wp_ajax_' . Ajax::ACTION_RESERVATION_CREATED, [ $this, 'update_reservation' ] );
 		remove_action( 'wp_ajax_' . Ajax::ACTION_RESERVATION_UPDATED, [ $this, 'update_reservation' ] );
@@ -272,12 +280,13 @@ class Controller extends Controller_Contract {
 		);
 		remove_filter( 'tec_tickets_commerce_attendee_to_delete', [ $this, 'handle_attendee_delete' ] );
 		remove_filter( 'pre_do_shortcode_tag', [ $this, 'filter_pre_do_shortcode_tag' ] );
+		remove_filter( 'tec_tickets_attendees_page_render_context', [ $this, 'adjust_attendee_page_render_context_for_seating' ] );
 	}
 
 	/**
 	 * Filters the page title for the seat tab.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string $title     The page title.
 	 * @param int    $post_id   The post ID.
@@ -298,7 +307,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Registers the seat reports.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
@@ -309,7 +318,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Registers the seat report page.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
@@ -320,7 +329,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Adds seat tab slug to the tab slug map.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array<string,string> $tab_map The tab slug map.
 	 *
@@ -335,7 +344,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Registers the seat tab.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param Tabbed_View $tabbed_view The tabbed view.
 	 * @param WP_Post     $post        The post.
@@ -346,7 +355,7 @@ class Controller extends Controller_Contract {
 		if ( ! $post ) {
 			return;
 		}
-		
+
 		if ( ! tec_tickets_seating_enabled( $post->ID ) ) {
 			return;
 		}
@@ -361,7 +370,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Handles the seat selection for the cart.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array $data The data to prepare for the cart.
 	 *
@@ -386,7 +395,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Adds the attendee seat column to the attendee list.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array<string,string> $columns  The columns for the Attendees table.
 	 * @param int                  $event_id The event ID.
@@ -400,7 +409,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Renders the seat column for the attendee list.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string              $value  Row item value.
 	 * @param array<string,mixed> $item   Row item data.
@@ -415,7 +424,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Include seats into sortable columns list.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array<string,string> $columns The column names.
 	 *
@@ -428,7 +437,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Handle seat column sorting.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array<string,mixed> $query_args An array of the query arguments the query will be initialized with.
 	 * @param WP_Query            $query      The query object, the query arguments have not been parsed yet.
@@ -443,7 +452,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Remove the move row action.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array<string,mixed> $default_row_actions The default row actions list.
 	 * @param array<string,mixed> $item                The attendee item array.
@@ -455,20 +464,29 @@ class Controller extends Controller_Contract {
 	}
 
 	/**
-	 * Confirms all the reservations contained in the Session cookie.
+	 * Confirms all the reservations contained in the Session cookie on generation of an Attendee.
+	 * If the order status is complete, it will also delete the token session.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
+	 * @since 5.17.0 - Refactored to pass a bool variable to confirm_all_reservations.
+	 *
+	 * @param array<Attendee>          $attendees  The generated attendees, unused.
+	 * @param \Tribe__Tickets__Tickets $ticket     The ticket the attendee is generated for, unused.
+	 * @param \WP_Post                 $order      The order the attendee is generated for, unused.
+	 * @param Status_Interface         $new_status New post status.
 	 *
 	 * @return void
 	 */
-	public function confirm_all_reservations(): void {
-		$this->session->confirm_all_reservations();
+	public function confirm_all_reservations( $attendees, $ticket, $order, $new_status ): void {
+		$incomplete_flags = array_intersect( $new_status->get_flags(), [ 'incomplete', 'count_incomplete' ] );
+		$delete_session   = count( $incomplete_flags ) === 0;
+		$this->session->confirm_all_reservations( $delete_session );
 	}
 
 	/**
 	 * Handle attendee delete.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param int $attendee_id The attendee ID.
 	 *
@@ -481,7 +499,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Get the localized data for the report.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param int|null $post_id The post ID.
 	 *
@@ -503,16 +521,17 @@ class Controller extends Controller_Contract {
 	/**
 	 * Registers the assets used by the Seats Report tab under individual event views.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
 	private function register_assets(): void {
 		Asset::add(
 			'tec-tickets-seating-admin-seats-report',
-			$this->built_asset_url( 'admin/seatsReport.js' ),
+			'admin/seatsReport.js',
 			Tickets_Main::VERSION
 		)
+			->add_to_group_path( 'tec-seating' )
 			->add_dependency( 'tec-tickets-seating-service-bundle' )
 			->enqueue_on( Seats_Report::$asset_action )
 			->add_localize_script(
@@ -525,9 +544,10 @@ class Controller extends Controller_Contract {
 
 		Asset::add(
 			'tec-tickets-seating-admin-seats-report-style',
-			$this->built_asset_url( 'admin/seatsReport.css' ),
+			'admin/seatsReport.css',
 			Tickets_Main::VERSION
 		)
+			->add_to_group_path( 'tec-seating' )
 			->add_to_group( 'tec-tickets-seating-admin' )
 			->add_to_group( 'tec-tickets-seating' )
 			->enqueue_on( Seats_Report::$asset_action )
@@ -538,7 +558,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Fetch attendees by post.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void The function does not return a value but will send the JSON response.
 	 */
@@ -554,7 +574,7 @@ class Controller extends Controller_Contract {
 		/**
 		 * Filters the number of Attendees to fetch per page when replying to the Fetch Attendees AJAX request.
 		 *
-		 * @since TBD
+		 * @since 5.16.0
 		 *
 		 * @param int $per_page The number of attendees to fetch per page.
 		 * @param int $post_id  The post ID.
@@ -603,7 +623,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Filters the default Attendee object to include seating data.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param WP_Post $post The attendee post object, decorated with a set of custom properties.
 	 *
@@ -616,7 +636,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Includes seating data in the email.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string                $file     The email file.
 	 * @param array<string, string> $name     The email name.
@@ -631,7 +651,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Inject seating label with ticket name on My Tickets page.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string        $html     The HTML content of ticket information.
 	 * @param string        $file     Complete path to include the PHP File.
@@ -647,7 +667,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Inject seating label with ticket name on Order success page.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string        $html     The HTML content of ticket information.
 	 * @param string        $file     Complete path to include the PHP File.
@@ -663,7 +683,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Updates an Attendee reservation from AJAX data.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void The function does not return a value but will send the JSON response.
 	 */
@@ -785,5 +805,40 @@ class Controller extends Controller_Contract {
 	 */
 	public function add_seats_row_action( array $actions, $post ): array {
 		return $this->seats_report->add_seats_row_action( $actions, $post );
+	}
+
+	/**
+	 * Adjust the attendee page render context for seating.
+	 *
+	 * @param array<string,mixed>  $render_context The render context.
+	 * @param int                  $post_id        The post ID.
+	 * @param array<Ticket_Object> $tickets        The tickets.
+	 *
+	 * @return array<string,mixed> The adjusted render context.
+	 */
+	public function adjust_attendee_page_render_context_for_seating( $render_context, $post_id, $tickets ) {
+		if ( ! ( is_array( $render_context ) && is_numeric( $post_id ) && is_array( $tickets ) ) ) {
+			return $render_context;
+		}
+
+		if ( ! tec_tickets_seating_enabled( $post_id ) ) {
+			return $render_context;
+		}
+
+		return $this->attendee->adjust_attendee_page_render_context_for_seating( $render_context, (int) $post_id, $tickets );
+	}
+
+	/**
+	 * On completion of a TC Order, confirm all the reservations and clear the session.
+	 *
+	 * @since 5.17.0
+	 *
+	 * @return void
+	 */
+	public function confirm_all_reservations_on_completion(): void {
+		// Attendees needing the session information will likely be generated after, warmup the session cache now.
+		$this->cart->warmup_caches();
+
+		$this->session->confirm_all_reservations();
 	}
 }

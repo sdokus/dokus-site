@@ -3,7 +3,7 @@
  * The main front-end controller. This controller will directly, or by delegation, subscribe to
  * front-end related hooks.
  *
- * @since   TBD
+ * @since   5.16.0
  *
  * @package TEC\Controller;
  */
@@ -12,7 +12,7 @@ namespace TEC\Tickets\Seating;
 
 use TEC\Common\Contracts\Provider\Controller as Controller_Contract;
 use TEC\Common\lucatume\DI52\Container;
-use TEC\Common\StellarWP\Assets\Asset;
+use TEC\Common\Asset;
 use TEC\Tickets\Seating\Admin\Ajax;
 use TEC\Tickets\Seating\Frontend\Session;
 use TEC\Tickets\Seating\Frontend\Timer;
@@ -22,21 +22,22 @@ use Tribe__Tickets__Main as ET;
 use Tribe__Tickets__Tickets as Tickets;
 use WP_Error;
 use Tribe__Tickets__Ticket_Object as Ticket_Object;
+use Tribe__Main as Common;
+use TEC\Tickets\Commerce\Checkout;
+use TEC\Tickets\Seating\Orders\Cart;
 
 /**
  * Class Controller.
  *
- * @since   TBD
+ * @since   5.16.0
  *
  * @package TEC\Controller;
  */
 class Frontend extends Controller_Contract {
-	use Built_Assets;
-
 	/**
 	 * The ID of the modal used to display the seat selection modal.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var string
 	 */
@@ -45,7 +46,7 @@ class Frontend extends Controller_Contract {
 	/**
 	 * The action that will be fired when this Controller registers.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var string
 	 */
@@ -54,7 +55,7 @@ class Frontend extends Controller_Contract {
 	/**
 	 * A reference to the template object.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var Template
 	 */
@@ -63,7 +64,7 @@ class Frontend extends Controller_Contract {
 	/**
 	 * A reference to the service object.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var Service
 	 */
@@ -72,7 +73,7 @@ class Frontend extends Controller_Contract {
 	/**
 	 * Controller constructor.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param Container $container A reference to the container object.
 	 * @param Template  $template  A reference to the template object.
@@ -87,7 +88,7 @@ class Frontend extends Controller_Contract {
 	/**
 	 * Unregisters the Controller by unsubscribing from WordPress hooks.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
@@ -100,7 +101,7 @@ class Frontend extends Controller_Contract {
 	/**
 	 * Replace the Tickets' block with the one starting the seat selection flow.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string              $html     The initial HTML.
 	 * @param string              $file     Complete path to include the PHP File.
@@ -137,7 +138,7 @@ class Frontend extends Controller_Contract {
 			/**
 			 * Filters the contents of the Tickets block when there is a problem with the service.
 			 *
-			 * @since TBD
+			 * @since 5.16.0
 			 *
 			 * @param string   $html     The HTML of the Tickets block.
 			 * @param Template $template A reference to the template object.
@@ -189,7 +190,7 @@ class Frontend extends Controller_Contract {
 		/**
 		 * Filters the contents of the Tickets block.
 		 *
-		 * @since TBD
+		 * @since 5.16.0
 		 *
 		 * @param string   $html     The HTML of the Tickets block.
 		 * @param Template $template A reference to the template object.
@@ -202,18 +203,18 @@ class Frontend extends Controller_Contract {
 	/**
 	 * Adjusts the event's ticket capacity to consider seating.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
-	 * @param int $event_id The event ID.
+	 * @param int $post_id The event ID.
 	 *
-	 * @return int
+	 * @return int The number of available ASC tickets for the post.
 	 */
-	public function get_events_ticket_capacity_for_seating( int $event_id ): int {
-		if ( ! tec_tickets_seating_enabled( $event_id ) ) {
+	public function get_events_ticket_capacity_for_seating( int $post_id ): int {
+		if ( ! tec_tickets_seating_enabled( $post_id ) ) {
 			return 0;
 		}
 
-		$provider = Tickets::get_event_ticket_provider_object( $event_id );
+		$provider = Tickets::get_event_ticket_provider_object( $post_id );
 
 		if ( ! $provider ) {
 			return 0;
@@ -221,8 +222,8 @@ class Frontend extends Controller_Contract {
 
 		$available = [];
 
-		foreach ( tribe_tickets()->where( 'event', $event_id )->get_ids( true ) as $ticket_id ) {
-			$ticket = $provider->get_ticket( $event_id, $ticket_id );
+		foreach ( tribe_tickets()->where( 'event', $post_id )->get_ids( true ) as $ticket_id ) {
+			$ticket = $provider->get_ticket( $post_id, $ticket_id );
 
 			if ( ! $ticket ) {
 				continue;
@@ -249,7 +250,7 @@ class Frontend extends Controller_Contract {
 	/**
 	 * Returns the HTML content of the seat selection modal.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param int $post_id The post ID of the post to purchase tickets for.
 	 * @param int $timeout The timeout in seconds.
@@ -300,7 +301,7 @@ class Frontend extends Controller_Contract {
 	/**
 	 * Registers the controller by subscribing to front-end hooks and binding implementations.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
@@ -312,9 +313,11 @@ class Frontend extends Controller_Contract {
 		// Register the front-end JS.
 		Asset::add(
 			'tec-tickets-seating-frontend',
-			$this->built_asset_url( 'frontend/ticketsBlock.js' ),
+			'frontend/ticketsBlock.js',
 			ET::VERSION
 		)
+			->add_to_group_path( 'tec-seating' )
+			->set_condition( [ $this, 'should_enqueue_assets' ] )
 			->set_dependencies(
 				'tribe-dialog-js',
 				'tec-tickets-seating-service-bundle',
@@ -334,9 +337,11 @@ class Frontend extends Controller_Contract {
 		// Register the front-end CSS.
 		Asset::add(
 			'tec-tickets-seating-frontend-style',
-			$this->built_asset_url( 'frontend/ticketsBlock.css' ),
+			'frontend/ticketsBlock.css',
 			ET::VERSION
 		)
+			->add_to_group_path( 'tec-seating' )
+			->set_condition( [ $this, 'should_enqueue_assets' ] )
 			->enqueue_on( 'wp_enqueue_scripts' )
 			->add_to_group( 'tec-tickets-seating-frontend' )
 			->add_to_group( 'tec-tickets-seating' )
@@ -344,9 +349,26 @@ class Frontend extends Controller_Contract {
 	}
 
 	/**
+	 * Checks if the current context is the Block Editor and the post type is ticket-enabled.
+	 *
+	 * @since 5.17.0
+	 *
+	 * @return bool Whether the assets should be enqueued or not.
+	 */
+	public function should_enqueue_assets() {
+		$ticketable_post_types = (array) tribe_get_option( 'ticket-enabled-post-types', [] );
+
+		if ( empty( $ticketable_post_types ) ) {
+			return false;
+		}
+
+		return ( tribe( Checkout::class )->is_current_page() && tribe( Cart::class )->cart_has_seating_tickets() ) || ( is_singular( $ticketable_post_types ) && tec_tickets_seating_enabled( Common::post_id_helper() ) );
+	}
+
+	/**
 	 * Adds the seat selected labels to the ticket block.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array         $attributes The attributes of the ticket block.
 	 * @param Ticket_Object $ticket     The ticket object.
@@ -380,7 +402,7 @@ class Frontend extends Controller_Contract {
 	/**
 	 * Returns the data to be localized on the ticket block frontend.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param int $post_id The post ID.
 	 *
@@ -423,7 +445,7 @@ class Frontend extends Controller_Contract {
 	/**
 	 * Builds the Seat Type map localized for the seat selection modal.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param int|null $post_id The current post ID.
 	 *

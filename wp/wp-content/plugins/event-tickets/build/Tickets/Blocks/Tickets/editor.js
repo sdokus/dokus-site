@@ -3360,7 +3360,7 @@ function* setBodyDetails(clientId) {
    * Fires after the body details have been set and before the request is sent.
    * The action will fire both when a ticket is being created and when an existing ticket is being updated.
    *
-   * @since TBD
+   * @since 5.16.0
    * @param {Object} body The body of the request.
    * @param {string} clientId The client ID of the ticket block that is being created or updated.
    */
@@ -3559,7 +3559,7 @@ function* createNewTicket(action) {
       /**
        * Fires after the ticket has been created.
        *
-       * @since TBD
+       * @since 5.16.0
        * @param {string} clientId The ticket's client ID.
        */
       Object(external_wp_hooks_["doAction"])('tec.tickets.blocks.ticketCreated', clientId);
@@ -3658,7 +3658,7 @@ function* updateTicket(action) {
       /**
        * Fires after the ticket has been updated.
        *
-       * @since TBD
+       * @since 5.16.0
        * @param {string} clientId The ticket's client ID.
        */
       Object(external_wp_hooks_["doAction"])('tec.tickets.blocks.ticketUpdated', clientId);
@@ -9510,7 +9510,7 @@ class template_TicketsDashboardAction extends external_React_["PureComponent"] {
       /**
        * Filters the actions that will be shown in the dashboard.
        *
-       * @since TBD
+       * @since 5.16.0
        *
        * @param {Array} actions The actions list that will be shown in the dashboard.
        * @param {Object} props The component props.
@@ -9710,12 +9710,22 @@ const CapacityTable = _ref => {
     unlimitedTicketItems,
     rowsAfter
   } = _ref;
-  const sharedInput = wp.element.createElement(external_tribe_common_elements_["NumberInput"], {
+  let sharedCapacityInput = wp.element.createElement(external_tribe_common_elements_["NumberInput"], {
     onChange: onSharedCapacityChange,
     value: sharedCapacity,
     disabled: isSettingsLoading,
     min: 0
   });
+
+  /**
+   * Filters the shared capacity input component.
+   *
+   * @since 5.16.0
+   *
+   * @param {React.Node} sharedCapacityInput The shared capacity input component.
+   * @param {number}     sharedCapacity      The shared capacity current value.
+   */
+  sharedCapacityInput = Object(external_wp_hooks_["applyFilters"])('tec.tickets.blocks.Tickets.CapacityTable.sharedCapacityInput', sharedCapacityInput, sharedCapacity);
   return wp.element.createElement("div", {
     className: "tribe-editor__tickets__capacity-table"
   }, wp.element.createElement("h3", {
@@ -9723,7 +9733,7 @@ const CapacityTable = _ref => {
   }, Object(external_wp_i18n_["__"])('Capacity', 'event-tickets')), wp.element.createElement(row_template, {
     label: Object(external_wp_i18n_["__"])('Shared capacity', 'event-tickets'),
     items: sharedTicketItems,
-    right: sharedInput
+    right: sharedCapacityInput
   }), wp.element.createElement(row_template, {
     label: Object(external_wp_i18n_["__"])('Independent capacity', 'event-tickets'),
     items: independentTicketItems,
@@ -9945,7 +9955,7 @@ const TicketsSettingsDashboard = _ref => {
   /**
    * Filters the settings fields.
    *
-   * @since TBD
+   * @since 5.16.0
    *
    * @param {Array} fields The settings fields.
    * @param {Object} props The component props.
@@ -10093,14 +10103,8 @@ const Availability = _ref => {
   const Total = wp.element.createElement(modules_elements["NumericLabel"], {
     className: external_tribe_modules_classnames_default()('tribe-editor__tickets__availability-label', 'tribe-editor__tickets__availability-label--total'),
     count: total,
-    singular: '%d ' +
-    // eslint-disable-next-line no-undef
-    sprintf( /* Translators: %s - ticket singular label, lowercase */
-    Object(external_wp_i18n_["__"])('total %s', 'event-tickets'), constants["TICKET_LABELS"].ticket.singularLowercase),
-    plural: '%d ' +
-    // eslint-disable-next-line no-undef
-    sprintf( /* Translators: %s - ticket plural label, lowercase */
-    Object(external_wp_i18n_["__"])('total %s', 'event-tickets'), constants["TICKET_LABELS"].ticket.pluralLowercase)
+    singular: '%d ' + Object(external_wp_i18n_["__"])('total capacity', 'event-tickets'),
+    plural: '%d ' + Object(external_wp_i18n_["__"])('total capacity', 'event-tickets')
   });
   return wp.element.createElement("div", {
     className: "tribe-editor__tickets__availability"

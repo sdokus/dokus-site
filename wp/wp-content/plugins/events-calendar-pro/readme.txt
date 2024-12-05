@@ -3,7 +3,7 @@
 Contributors: theeventscalendar, borkweb, bordoni, brianjessee, aguseo, camwynsp, GeoffBel, jentheo, leahkoerper, lucatume, neillmcshea, vicskf, zbtirrell, juanfra
 Tags: events, calendar, event, venue, organizer, dates, date, google maps, conference, workshop, concert, meeting, seminar, summit, class, the events calendar, widget, pro
 Donate link: https://evnt.is/29
-Stable tag: 7.3.0.0-dev
+Stable tag: 7.3.0
 Requires at least: 6.3
 Tested up to: 6.6.2
 Requires PHP: 7.4
@@ -213,6 +213,25 @@ Previous versions of Events Calendar Pro are not cross-compatible with 6.X add-o
 Remember to always make a backup of your database and files before updating!
 
 == Changelog ==
+
+= [7.3.0] 2024-10-30 =
+
+* Version - Events Pro 7.3.0 is only compatible with The Events Calendar 6.8.0 or higher.
+* Feature - Added integration with new premium Seating product for Event Tickets.
+* Language - 0 new strings added, 0 updated, 0 fuzzied, and 0 obsoleted
+
+= [7.2.1] 2024-10-21 =
+
+* Fix - Correct some dates and strings in admin screens were not translated [TEC-4873]
+* Fix - Correct styling of "Fix geolocation data" in Maps settings page. [TEC-5282]
+* Fix - Fix an issue with Kadence where the calendar was wider than the content container. [ECP-1827]
+* Fix - Fix hook name to ensure that settings linked to a custom Google Maps API key show up. [ECP-1866]
+* Fix - Make sure that all events are updated when running a CSV import. [ECP-1684]
+* Fix - Make sure the house number is saved with the address when fetching geolocation data with a custom Google Maps API key. [ECP-1481]
+* Fix - Resolves issue where in some situations custom fields were not retained on the occurrence on recurring events. [TEC-5239]
+* Tweak - Introduce a filter to allow changing the order of the street name and house number when fetching geolocation data with a custom Google Maps API key.
+* Tweak - Added filter `tec_events_pro_enable_series_content_injection` to allow for bypassing series injection in the content [ECP-1839].
+* Language - 1 new strings added, 72 updated, 0 fuzzied, and 0 obsoleted
 
 = [7.2.0] 2024-10-09 =
 

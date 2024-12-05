@@ -12,22 +12,22 @@ namespace TEC\Tickets\Seating;
 
 use TEC\Common\Contracts\Provider\Controller as Controller_Contract;
 use TEC\Tickets\Seating\Frontend\Session;
+use TEC\Common\StellarWP\Assets\Config;
+use Tribe__Tickets__Main as Tickets_Plugin;
 
 /**
  * Class Controller
  *
- * @since   1.0.0
+ * @since 5.16.0
  *
  * @package TEC/Controller
  */
 class Controller extends Controller_Contract {
-	use Built_Assets;
-
 	/**
 	 * The name of the constant that will be used to disable the feature.
 	 * Setting it to a truthy value will disable the feature.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var string
 	 */
@@ -35,7 +35,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * The action that will be fired when this Controller registers.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var string
 	 */
@@ -44,7 +44,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Unregisters the Controller by unsubscribing from WordPress hooks.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
@@ -59,7 +59,7 @@ class Controller extends Controller_Contract {
 	/**
 	 * Determines if the feature is enabled or not.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return bool Whether the feature is enabled or not.
 	 */
@@ -84,7 +84,7 @@ class Controller extends Controller_Contract {
 		 * Note: this filter will only apply if the disable constant or env var
 		 * are not set or are set to falsy values.
 		 *
-		 * @since TBD
+		 * @since 5.16.0
 		 *
 		 * @param bool $activate Defaults to `true`.
 		 */
@@ -94,12 +94,15 @@ class Controller extends Controller_Contract {
 	/**
 	 * Registers the controller by subscribing to WordPress hooks and binding implementations.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
 	protected function do_register(): void {
 		require_once __DIR__ . '/template-tags.php';
+
+		// Add the group path for the seating assets.
+		Config::add_group_path( 'tec-seating', Tickets_Plugin::instance()->plugin_path . 'build/', 'Seating/' );
 
 		$this->container->singleton( Template::class );
 		$this->container->singleton( Localization::class );
@@ -123,6 +126,8 @@ class Controller extends Controller_Contract {
 		// Manage Order and Attendee data.
 		$this->container->register( Orders\Controller::class );
 
+		$this->container->register( Delete_Operations::class );
+
 		/*
 		 * The Timer will have to handle the AJAX and initial requests to handle and render the timer.
 		 * For this reason, it's always registered.
@@ -139,6 +144,8 @@ class Controller extends Controller_Contract {
 		 * AJAX will power both frontend and backend, always register it.
 		 */
 		$this->container->register( Admin\Ajax::class );
+
+		$this->container->register( Settings::class );
 
 		if ( is_admin() ) {
 			$this->container->register( Admin::class );
@@ -159,19 +166,19 @@ class Controller extends Controller_Contract {
 	/**
 	 * Builds and returns the Service facade class ready to use.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return Service\Service An instance of the Service facade class.
 	 */
 	private function build_service_facade(): Service\Service {
 		$backend_base_url = defined( 'TEC_TICKETS_SEATING_SERVICE_BASE_URL' )
 			? TEC_TICKETS_SEATING_SERVICE_BASE_URL
-			: 'https://evnt.is';
+			: 'https://seating.theeventscalendar.com';
 
 		/**
 		 * Filters the base URL of the service for backend requests.
 		 *
-		 * @since TBD
+		 * @since 5.16.0
 		 *
 		 * @param string $backend_base_url The base URL of the service.
 		 */
@@ -181,12 +188,12 @@ class Controller extends Controller_Contract {
 
 		$frontend_base_url = defined( 'TEC_TICKETS_SEATING_SERVICE_BASE_URL' )
 			? TEC_TICKETS_SEATING_SERVICE_BASE_URL
-			: 'https://evnt.is';
+			: 'https://seating.theeventscalendar.com';
 
 		/**
 		 * Filters the base URL of the service for frontend requests.
 		 *
-		 * @since TBD
+		 * @since 5.16.0
 		 *
 		 * @param string $frontend_base_url The base URL of the service.
 		 */

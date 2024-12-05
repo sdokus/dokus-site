@@ -1288,6 +1288,7 @@ body.events-cal .tribe-common div.tribe-dialog, body.events-cal .event-tickets d
 
 .tec-tickets__admin-settings-featured-link {
 	align-items: center;
+	color: var(--tec-color-text-primary);
 	display: flex;
 }
 

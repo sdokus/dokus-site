@@ -2,7 +2,7 @@
 /**
  * The service component used to fetch the Maps from the service.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @package TEC\Controller\Service;
  */
@@ -18,7 +18,7 @@ use TEC\Tickets\Seating\Tables\Layouts as Layouts_Table;
 /**
  * Class Maps.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @package TEC\Controller\Service;
  */
@@ -29,21 +29,31 @@ class Maps {
 	/**
 	 * The URL to the service used to fetch the maps from the backend.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var string
 	 */
 	private string $service_fetch_url;
 
 	/**
+	 * A reference to the Layouts service facade.
+	 *
+	 * @since 5.16.0
+	 *
+	 * @var Layouts
+	 */
+	private Layouts $layouts;
+
+	/**
 	 * Maps constructor.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string $backend_base_url The base URL of the service from the site backend.
 	 */
-	public function __construct( string $backend_base_url ) {
+	public function __construct( string $backend_base_url, Layouts $layouts ) {
 		$this->service_fetch_url = rtrim( $backend_base_url, '/' ) . '/api/v1/maps';
+		$this->layouts = $layouts;
 	}
 
 	/**
@@ -52,7 +62,7 @@ class Maps {
 	 * Note that, while likely required, this method will not invalidate the cache for the
 	 * Layouts.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return bool Whether the cache was invalidated or not.
 	 */
@@ -66,7 +76,7 @@ class Maps {
 		 * Fires after the caches and custom tables storing information about Maps have been
 		 * invalidated.
 		 *
-		 * @since TBD
+		 * @since 5.16.0
 		 */
 		do_action( 'tec_tickets_seating_invalidate_maps_layouts_cache' );
 
@@ -76,7 +86,7 @@ class Maps {
 	/**
 	 * Fetches all the Maps from the database.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return Map_Card[] Array of map card objects.
 	 */
@@ -87,6 +97,9 @@ class Maps {
 
 		$cache_key = 'option_map_card_objects';
 		$map_cards = wp_cache_get( $cache_key, 'tec-tickets-seating' );
+
+		// Update the Layouts.
+		$this->layouts->update( true );
 
 		if ( ! ( $map_cards && is_array( $map_cards ) ) ) {
 			$map_cards = [];
@@ -114,7 +127,7 @@ class Maps {
 	/**
 	 * Inserts multiple rows from the service into the table.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array<array{ id?: string, name?: string, seats?: int, screenshotUrl?: string}> $service_rows The rows to insert.
 	 *
@@ -155,7 +168,7 @@ class Maps {
 	/**
 	 * Updates the Maps from the service by updating the caches and custom tables.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param bool $force If true, the Maps will be updated even if they are up-to-date.
 	 *
@@ -172,7 +185,7 @@ class Maps {
 	/**
 	 * Returns the transient name used to store the last update time.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return string The transient name used to store the last update time.
 	 */
@@ -183,7 +196,7 @@ class Maps {
 	/**
 	 * Returns the expiration time in seconds.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return int The expiration time in seconds.
 	 */
@@ -194,7 +207,7 @@ class Maps {
 	/**
 	 * Checks if the map has layouts.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string $map_id The ID of the map.
 	 *
@@ -211,7 +224,7 @@ class Maps {
 	/**
 	 * Returns the URL to delete a map.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string $map_id The ID of the map to delete.
 	 *
@@ -229,7 +242,7 @@ class Maps {
 	/**
 	 * Deletes a map from the service.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string $map_id The ID of the map.
 	 *
@@ -240,7 +253,7 @@ class Maps {
 		if ( $this->map_has_layouts( $map_id ) ) {
 			return false;
 		}
-		
+
 		$url = $this->get_delete_url( $map_id );
 
 		$args = [

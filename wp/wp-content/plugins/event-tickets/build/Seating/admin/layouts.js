@@ -183,7 +183,7 @@ var external_tec_tickets_seating_utils_ = __webpack_require__("MsaN");
 /**
  * Get localized string for the given key.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} key The key to get the localized string for.
  *
@@ -196,7 +196,7 @@ function getString(key) {
 /**
  * Register delete action on all links with class 'delete-layout'.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLDocument|null} dom The document to use to search for the delete buttons.
  */
@@ -204,34 +204,43 @@ function registerDeleteAction(dom) {
   dom = dom || document;
   // Add click listener to all links with class 'delete'.
   dom.querySelectorAll('.delete-layout').forEach(function (link) {
-    link.addEventListener('click', /*#__PURE__*/function () {
-      var _ref = asyncToGenerator_default()(function* (event) {
-        event.preventDefault();
-        yield handleDelete(event.target);
-      });
-      return function (_x) {
-        return _ref.apply(this, arguments);
-      };
-    }());
+    link.addEventListener('click', deleteListener);
   });
 }
 
 /**
+ * Bind the delete action.
+ *
+ * @since 5.17.0
+ *
+ * @param {Event} event The click event.
+ */
+function deleteListener(_x) {
+  return _deleteListener.apply(this, arguments);
+}
+/**
  * Handle delete action.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLElement} element The target item.
  *
  * @return {Promise<void>}
  */
+function _deleteListener() {
+  _deleteListener = asyncToGenerator_default()(function* (event) {
+    event.preventDefault();
+    yield handleDelete(event.target);
+  });
+  return _deleteListener.apply(this, arguments);
+}
 function handleDelete(_x2) {
   return _handleDelete.apply(this, arguments);
 }
 /**
  * Delete layout.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} layoutId The layout ID.
  * @param {string} mapId    The map ID.
@@ -267,7 +276,7 @@ function deleteLayout(_x3, _x4) {
 /**
  * Register destructive edit action on all links with class 'edit-layout'.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLDocument|null} dom The document to use to search for the edit buttons.
  */
@@ -289,29 +298,45 @@ function registerDestructiveEditAction(dom) {
   dom = dom || document;
   // Add click listener to all links with class 'delete'.
   dom.querySelectorAll('.edit-layout').forEach(function (link) {
-    link.addEventListener('click', /*#__PURE__*/function () {
-      var _ref2 = asyncToGenerator_default()(function* (event) {
-        handleDestructiveEdit(event);
-      });
-      return function (_x5) {
-        return _ref2.apply(this, arguments);
-      };
-    }());
+    link.addEventListener('click', destructiveEditActionListener);
   });
 }
 
 /**
+ * Bind the destructive edit action.
+ *
+ * @since 5.17.0
+ *
+ * @param {Event} event The click event.
+ */
+function destructiveEditActionListener(_x5) {
+  return _destructiveEditActionListener.apply(this, arguments);
+}
+/**
  * Handle destructive edit action.
  *
- * @since TBD
+ * @since 5.16.0
  *
- * @param {ClickEvent} event The click event.
+ * @param {Event} event The click event.
  *
  * @return {Promise<void>}
  */
+function _destructiveEditActionListener() {
+  _destructiveEditActionListener = asyncToGenerator_default()(function* (event) {
+    yield handleDestructiveEdit(event);
+  });
+  return _destructiveEditActionListener.apply(this, arguments);
+}
 function handleDestructiveEdit(_x6) {
   return _handleDestructiveEdit.apply(this, arguments);
 }
+/**
+ * Register a duplicate action on all the duplicate layout buttons.
+ *
+ * @since 5.17.0
+ *
+ * @param {HTMLDocument|null} dom The document to use to search for the duplicate buttons.
+ */
 function _handleDestructiveEdit() {
   _handleDestructiveEdit = asyncToGenerator_default()(function* (event) {
     const associatedEvents = event.target.getAttribute('data-event-count');
@@ -326,9 +351,92 @@ function _handleDestructiveEdit() {
   });
   return _handleDestructiveEdit.apply(this, arguments);
 }
+function registerDuplicateLayoutAction(dom) {
+  dom = dom || document;
+  dom.querySelectorAll('.duplicate-layout').forEach(function (btn) {
+    btn.addEventListener('click', duplicateListener);
+  });
+}
+
+/**
+ * Bind the duplicate action.
+ *
+ * @since 5.17.0
+ *
+ * @param {Event} event The click event.
+ */
+function duplicateListener(_x7) {
+  return _duplicateListener.apply(this, arguments);
+}
+/**
+ * Handle the duplicate layout action.
+ *
+ * @since 5.17.0
+ *
+ * @param {HTMLButtonElement} target The target button.
+ *
+ * @return {Promise<void>}
+ */
+function _duplicateListener() {
+  _duplicateListener = asyncToGenerator_default()(function* (event) {
+    event.preventDefault();
+    yield handleDuplicateAction(event.target);
+  });
+  return _duplicateListener.apply(this, arguments);
+}
+function handleDuplicateAction(_x8) {
+  return _handleDuplicateAction.apply(this, arguments);
+}
+/**
+ * Duplicate a layout by layout ID.
+ *
+ * @since 5.17.0
+ *
+ * @param {string} layoutId The layout ID.
+ *
+ * @return {Promise<boolean|object>} A promise with an object of the duplicated layout, or false otherwise.
+ */
+function _handleDuplicateAction() {
+  _handleDuplicateAction = asyncToGenerator_default()(function* (target) {
+    const layoutId = target.getAttribute('data-layout-id');
+    if (!layoutId) {
+      alert(Object(external_tec_tickets_seating_utils_["getLocalizedString"])('duplicate-failed', 'layouts'));
+      return;
+    }
+    target.disabled = false;
+    const card = target.closest('.tec-tickets__seating-tab__card');
+    card.style.opacity = 0.5;
+    const result = yield duplicateLayout(layoutId);
+    if (!(result !== null && result !== void 0 && result.success)) {
+      alert(Object(external_tec_tickets_seating_utils_["getLocalizedString"])('duplicate-failed', 'layouts'));
+      card.style.opacity = 1;
+      target.disabled = false;
+      return;
+    }
+    Object(external_tec_tickets_seating_utils_["redirectTo"])(result.data);
+  });
+  return _handleDuplicateAction.apply(this, arguments);
+}
+function duplicateLayout(_x9) {
+  return _duplicateLayout.apply(this, arguments);
+}
+function _duplicateLayout() {
+  _duplicateLayout = asyncToGenerator_default()(function* (layoutId) {
+    const url = new URL(external_tec_tickets_seating_ajax_["ajaxUrl"]);
+    url.searchParams.set('_ajax_nonce', external_tec_tickets_seating_ajax_["ajaxNonce"]);
+    url.searchParams.set('layoutId', layoutId);
+    url.searchParams.set('action', external_tec_tickets_seating_ajax_["ACTION_DUPLICATE_LAYOUT"]);
+    const response = yield fetch(url.toString(), {
+      method: 'POST'
+    });
+    return yield response.json();
+  });
+  return _duplicateLayout.apply(this, arguments);
+}
 
 Object(external_tec_tickets_seating_utils_["onReady"])(() => registerDeleteAction(document));
 Object(external_tec_tickets_seating_utils_["onReady"])(() => registerDestructiveEditAction(document));
+Object(external_tec_tickets_seating_utils_["onReady"])(() => registerDuplicateLayoutAction(document));
 // CONCATENATED MODULE: ./src/Tickets/Seating/app/admin/layouts/localized-data.js
 var _window, _window$tec, _window$tec$tickets, _window$tec$tickets$s;
 /**
@@ -365,7 +473,7 @@ function waitForModalElement() {
 /**
  * Registers the modal actions.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {void} Handles the modal actions.
  */
@@ -398,7 +506,7 @@ function modalActionListener() {
 /**
  * Handles adding a new layout.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Event} event The event object.
  *
@@ -411,7 +519,7 @@ function addNewLayout(_x) {
 /**
  * Adds a new layout by map ID.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {string} mapId The map ID.
  *
@@ -446,7 +554,7 @@ function addLayoutByMapId(_x2) {
 /**
  * Handles the map select updates.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {Event} event The event object.
  *
@@ -482,7 +590,7 @@ function handleSelectUpdates(event) {
 /**
  * Closes the modal element using its reference on the window object.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {void} The modal is closed.
  */
@@ -498,7 +606,7 @@ function closeModal() {
 /**
  * Initializes the modal element once it's loaded.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @return {void} Initializes the modal element once it's loaded.
  */

@@ -2,7 +2,7 @@
 /**
  * The Controller to set up the Uplink library.
  *
- * @since   TBD
+ * @since   5.16.0
  *
  * @package TEC\Tickets\Seating
  */
@@ -13,12 +13,16 @@ use TEC\Common\Contracts\Provider\Controller as Controller_Contract;
 use TEC\Common\lucatume\DI52\Container;
 use TEC\Common\StellarWP\Uplink\Register;
 use TEC\Common\StellarWP\Uplink\Resources\Resource;
+use TEC\Tickets\Seating\Tables\Layouts;
+use TEC\Tickets\Seating\Tables\Maps;
+use TEC\Tickets\Seating\Tables\Seat_Types;
+use TEC\Tickets\Seating\Tables\Sessions;
 use Tribe__Tickets__Main as Main;
 
 /**
  * Controller for setting up the stellarwp/uplink library.
  *
- * @since   TBD
+ * @since   5.16.0
  *
  * @package TEC\Tickets\Seating
  */
@@ -47,7 +51,7 @@ class Uplink extends Controller_Contract {
 	/**
 	 * Uplink Controller constructor.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param Container $container A reference to the DI container object.
 	 */
@@ -60,7 +64,7 @@ class Uplink extends Controller_Contract {
 	/**
 	 * Register the controller.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 */
 	public function do_register(): void {
 		add_action( 'init', [ $this, 'register_plugin' ] );
@@ -71,12 +75,13 @@ class Uplink extends Controller_Contract {
 			2
 		);
 		add_action( 'stellarwp/uplink/tec/license_field_before_input', [ $this, 'render_legend_before_input' ] );
+		add_action( 'stellarwp/uplink/tec/tec-seating/connected', [ $this, 'reset_data_on_new_connection' ] );
 	}
 
 	/**
 	 * Unregister the controller.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
@@ -87,12 +92,13 @@ class Uplink extends Controller_Contract {
 			[ $this, 'get_connect_button_text' ]
 		);
 		remove_action( 'stellarwp/uplink/tec/license_field_before_input', [ $this, 'render_legend_before_input' ] );
+		remove_action( 'stellarwp/uplink/tec/tec-seating/connected', [ $this, 'reset_data_on_new_connection' ] );
 	}
 
 	/**
 	 * Register the plugin in the uplink library.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return void
 	 */
@@ -112,7 +118,7 @@ class Uplink extends Controller_Contract {
 	 * Filters the text for the Seating Builder connection button to return one customized for the
 	 * SLR feature.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string $label         The label for the button.
 	 * @param bool   $authenticated Whether the user is authenticated or not.
@@ -128,7 +134,7 @@ class Uplink extends Controller_Contract {
 	/**
 	 * Renders the legend for the license key field.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string $field_id The field ID.
 	 */
@@ -140,5 +146,22 @@ class Uplink extends Controller_Contract {
 		echo '<legend class="tribe-field-label">' .
 			esc_html_x( 'License Key', 'Legend for the license key field', 'event-tickets' ) .
 			'</legend>';
+	}
+
+	/**
+	 * Reset data on new connection.
+	 *
+	 * @since 5.17.0
+	 */
+	public function reset_data_on_new_connection() {
+		// Truncate tables.
+		tribe( Maps::class )->truncate();
+		tribe( Layouts::class )->truncate();
+		tribe( Seat_Types::class )->truncate();
+		tribe( Sessions::class )->truncate();
+
+		// Clear cache.
+		tribe( Service\Maps::class )->invalidate_cache();
+		tribe( Service\Layouts::class )->invalidate_cache();
 	}
 }

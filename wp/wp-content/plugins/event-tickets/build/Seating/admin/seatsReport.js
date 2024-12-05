@@ -253,7 +253,7 @@ const {
 /**
  * Fetches attendees for a given post ID.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {number} currentBatch The batch number to fetch.
  *
@@ -266,7 +266,7 @@ function fetchAttendees(_x) {
 /**
  * Recursively fetches attendees in batches and sends them to the service via the iframe.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLElement} iframe         The service iframe element to send messages to.
  * @param {number}      currentBatch   The batch number to fetch.
@@ -310,7 +310,7 @@ function fetchAndSendAttendeeBatch(_x2, _x3, _x4, _x5) {
 /**
  * Fetches the attendees in batches and sends them to the service via the iframe.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLElement} iframe The service iframe element to send messages to.
  *
@@ -357,7 +357,7 @@ function sendAttendeesToService(_x6) {
 /**
  * Updates the Attendee with the new reservation data.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {ReservationCreatedProps|ReservationUpdatedProps} props The update/create properties.
  *
@@ -378,7 +378,7 @@ function updateAttendeeReservation(_x7) {
 /**
  * Handles the action to create an Attendee reservation.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLElement}             iframe The service iframe element to send messages to.
  * @param {ReservationCreatedProps} props  The action properties.
@@ -414,7 +414,7 @@ function handleReservationCreated(_x8, _x9) {
 /**
  * Handles the action to update an Attendee reservation.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLElement}             iframe The service iframe element to send messages to.
  * @param {ReservationUpdatedProps} props  The action properties.
@@ -441,7 +441,7 @@ function handleReservationUpdated(_x10, _x11) {
 /**
  * Registers the handlers for the messages received from the service.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLElement} iframe The service iframe element to listen to.
  */
@@ -473,7 +473,7 @@ function registerActions(iframe) {
 /**
  * Initializes iframe and the communication with the service.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLDocument|null} dom The document to use to search for the iframe element.
  *
@@ -560,7 +560,7 @@ module.exports = tec.tickets.seating.ajax;
 /**
  * Handles the seat types updated action.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {UpdatedSeatTypeData} data The updated seat types.
  *
@@ -580,7 +580,7 @@ function handleSeatTypesUpdated(_x) {
 /**
  * Handles the seat type deleted action.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {SeatTypeDeletedData} data The deleted seat type data.
  *
@@ -623,7 +623,7 @@ function handleSeatTypeDeleted(_x2) {
 /**
  * Handles the deletion of reservations.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {ReservationsDeletedData} data The IDs of the reservations that were deleted.
  *
@@ -665,7 +665,7 @@ function handleReservationsDeleted(_x3) {
 /**
  * Handles the update of Reservations following a Seat Type update.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {ReservationsUpdateFollowingSeatTypesData} data The updated reservations.
  *

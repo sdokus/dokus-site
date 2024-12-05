@@ -93,7 +93,7 @@ if ( ! class_exists( 'Tribe__Events__Pro__Main' ) ) {
 		/**
 		 * The Events Calendar Pro Version
 		 */
-		const VERSION = '7.3.0.0-dev-dev-1728980704-e7d32935';
+		const VERSION = '7.3.0';
 
 		/**
 		 * The Events Calendar Required Version
@@ -186,6 +186,7 @@ if ( ! class_exists( 'Tribe__Events__Pro__Main' ) ) {
 			add_action( 'plugins_loaded', [ $this, 'init_apm_filters' ] );
 
 			// Event CSV import additions.
+			add_filter( 'tribe_events_import_event_duplicate_matches', [ $this, 'normalize_post_ids_for_csv_import' ], 10, 1 );
 			add_filter( 'tribe_events_importer_venue_column_names', [ Tribe__Events__Pro__CSV_Importer__Fields::instance(), 'filter_venue_column_names' ], 10, 1 );
 			add_filter( 'tribe_events_importer_venue_array', [ Tribe__Events__Pro__CSV_Importer__Fields::instance(), 'filter_venue_array' ], 10, 4 );
 
@@ -1917,6 +1918,24 @@ if ( ! class_exists( 'Tribe__Events__Pro__Main' ) ) {
 		 */
 		public function set_post_id_for_recurring_event_query( $query ): void {
 			tribe( Legacy_Query_Filters::class )->set_post_id_for_recurring_event_query( $query );
+		}
+
+		/**
+		 * Normalize the Occurrence post IDs when running a CSV import.
+		 *
+		 * @since 7.3.0
+		 *
+		 * @param array $matches An array of post IDs, which can be provisional or the default.
+		 *
+		 * @return array|int[]   An array of default/normalized post IDs.
+		 */
+		public function normalize_post_ids_for_csv_import( array $matches ): array {
+			return array_map(
+				function ( $matched ) {
+					return \TEC\Events\Custom_Tables\V1\Models\Occurrence::normalize_id( $matched );
+				},
+				$matches
+			);
 		}
 	}
 }

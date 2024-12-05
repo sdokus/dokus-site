@@ -2,7 +2,7 @@
 /**
  * The service component used to fetch the Layouts from the service.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @package TEC\Controller\Service;
  */
@@ -23,7 +23,7 @@ use Tribe__Tickets__Main as Tickets;
 /**
  * Class Layouts.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @package TEC\Controller\Service;
  */
@@ -34,7 +34,7 @@ class Layouts {
 	/**
 	 * The URL to the service used to fetch the layouts from the backend.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var string
 	 */
@@ -43,7 +43,7 @@ class Layouts {
 	/**
 	 * Layouts constructor.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string $backend_base_url The base URL of the service from the site backend.
 	 */
@@ -54,7 +54,7 @@ class Layouts {
 	/**
 	 * Inserts multiple rows from the service into the table.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array<array{ id?: string, name?: string, seats?: int, mapId?: string, createdDate?: string, screenshotUrl?: string}> $service_rows The rows to insert.
 	 *
@@ -102,7 +102,7 @@ class Layouts {
 	/**
 	 * Returns the layouts in option format.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return array<array{id: string, name: string, seats: int}> The layouts in option format.
 	 */
@@ -137,7 +137,7 @@ class Layouts {
 	/**
 	 * Fetches all the Layouts from the database.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return Layout_Card[] Array of layout card objects.
 	 */
@@ -171,7 +171,7 @@ class Layouts {
 	/**
 	 * Updates the layouts from the service by updating the caches and custom tables.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param bool $force If true, the layouts will be updated even if they are up-to-date.
 	 *
@@ -188,7 +188,7 @@ class Layouts {
 	/**
 	 * Returns the transient name used to store the last update time.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return string The transient name used to store the last update time.
 	 */
@@ -199,7 +199,7 @@ class Layouts {
 	/**
 	 * Returns the expiration time in seconds.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @return int The expiration time in seconds.
 	 */
@@ -210,7 +210,7 @@ class Layouts {
 	/**
 	 * Returns the number of events associated with the layout.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string $layout_id The ID of the layout.
 	 *
@@ -262,7 +262,7 @@ class Layouts {
 	/**
 	 * Invalidates all the caches and custom tables storing information about Layouts.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param boolean $truncate Whether to truncate the caches and custom tables storing information about Layouts.
 	 *
@@ -283,7 +283,7 @@ class Layouts {
 		 * Fires after the caches and custom tables storing information about Layouts have been
 		 * invalidated.
 		 *
-		 * @since TBD
+		 * @since 5.16.0
 		 *
 		 * @param boolean $truncate Whether to truncate the caches and custom tables storing information about Layouts.
 		 */
@@ -295,7 +295,7 @@ class Layouts {
 	/**
 	 * Returns the URL to delete a layout.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string $layout_id The UUID of the layout to delete.
 	 * @param string $map_id    The UUID of the map the layout belongs to.
@@ -315,7 +315,7 @@ class Layouts {
 	/**
 	 * Deletes a layout from the service.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string $layout_id The ID of the layout to delete.
 	 * @param string $map_id    The Map ID of the layout to delete.
@@ -358,7 +358,7 @@ class Layouts {
 	/**
 	 * Returns the URL to add a new layout.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string $map_id The ID of the map to add the layout to.
 	 *
@@ -376,7 +376,7 @@ class Layouts {
 	/**
 	 * Adds a new layout to the service.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string $map_id The ID of the map to add the layout to.
 	 *
@@ -418,9 +418,72 @@ class Layouts {
 	}
 
 	/**
+	 * Returns the URL to add a new layout.
+	 *
+	 * @since 5.17.0
+	 *
+	 * @param string $layout_id The ID of the map to add the layout to.
+	 *
+	 * @return string The URL for a layout duplication request.
+	 */
+	public function get_duplicate_url( string $layout_id ): string {
+		return add_query_arg(
+			[
+				'layout' => $layout_id,
+			],
+			$this->service_fetch_url . '/duplicate'
+		);
+	}
+
+	/**
+	 * Duplicates a layout in the service.
+	 *
+	 * @since 5.17.0
+	 *
+	 * @param string $layout_id The ID of the layout to duplicate.
+	 *
+	 * @return string|bool Layout ID on success, false on failure.
+	 */
+	public function duplicate_layout( string $layout_id ) {
+		$url = $this->get_duplicate_url( $layout_id );
+
+		$args = [
+			'method'  => 'POST',
+			'headers' => [
+				'Authorization' => 'Bearer ' . $this->get_oauth_token(),
+				'Content-Type'  => 'application/json',
+			],
+		];
+
+		$response = wp_remote_request( $url, $args );
+		$code     = wp_remote_retrieve_response_code( $response );
+
+		if ( is_wp_error( $response ) || 200 !== $code ) {
+			$this->log_error(
+				'Failed to duplicate layout in the service.',
+				[
+					'source'   => __METHOD__,
+					'code'     => $code,
+					'url'      => $url,
+					'response' => $response,
+				]
+			);
+			return false;
+		}
+
+		$body      = json_decode( wp_remote_retrieve_body( $response ), true );
+		$layout_id = Arr::get( $body, [ 'data', 'items', 0, 'id' ] );
+
+		self::invalidate_cache();
+		Maps::invalidate_cache();
+
+		return $layout_id;
+	}
+
+	/**
 	 * Updates the capacity of all posts for the given layout IDs.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array<string,int> $updates The layout ID to seats count map.
 	 *
@@ -463,12 +526,12 @@ class Layouts {
 							->get_ids( true ) as $post_id
 			) {
 				$previous_capacity = get_post_meta( $post_id, $capacity_meta_key, true );
-				$capacity_delta    = $seats - $previous_capacity;
+				$capacity_delta    = $seats - (int) $previous_capacity;
 				$previous_stock    = get_post_meta( $post_id, Global_Stock::GLOBAL_STOCK_LEVEL, true );
-				$new_stock         = max( 0, $previous_stock + $capacity_delta );
+				$new_stock         = max( 0, (int) $previous_stock + $capacity_delta );
 				update_post_meta( $post_id, $capacity_meta_key, $seats );
 				update_post_meta( $post_id, Global_Stock::GLOBAL_STOCK_LEVEL, $new_stock );
-				++$total_updated;
+				++ $total_updated;
 				// The reason we're not running a batch update is to have per-post cache control.
 				clean_post_cache( $post_id );
 			}

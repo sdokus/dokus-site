@@ -2,7 +2,7 @@
 /**
  * Handles the rendering of the service error content.
  *
- * @since   TBD
+ * @since   5.16.0
  *
  * @package TEC\Tickets\Seating\Service;
  */
@@ -14,7 +14,7 @@ use TEC\Tickets\Seating\Admin\Template;
 /**
  * Class Error_Content.
  *
- * @since   TBD
+ * @since   5.16.0
  *
  * @package TEC\Tickets\Seating\Service;
  */
@@ -22,7 +22,7 @@ class Error_Content {
 	/**
 	 * A reference to the Service Status object.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var Service_Status
 	 */
@@ -31,7 +31,7 @@ class Error_Content {
 	/**
 	 * A reference to the Template object.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @var Template
 	 */
@@ -40,7 +40,7 @@ class Error_Content {
 	/**
 	 * Error_Content constructor.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param Template $template A reference to the admin Template object.
 	 */
@@ -51,7 +51,7 @@ class Error_Content {
 	/**
 	 * Renders the error content in the context of an admin area tab.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param Service_Status $status The service status object.
 	 */
@@ -60,10 +60,12 @@ class Error_Content {
 		$cta_label = null;
 
 		switch ( $status->get_status() ) {
-			default:
-			case Service_Status::SERVICE_DOWN:
+			case Service_Status::NO_LICENSE:
+				// upsell ?
+				return;
+			case Service_Status::SERVICE_UNREACHABLE:
 				$message = __(
-					'The Seating Builder service is down. We are working to restore functionality.',
+					'Your site cannot connect to the Seating Builder service.',
 					'event-tickets'
 				);
 				break;
@@ -76,14 +78,13 @@ class Error_Content {
 				$cta_url   = admin_url( 'admin.php?page=tec-tickets-settings&tab=licenses' );
 				break;
 			case Service_Status::EXPIRED_LICENSE:
-			case Service_Status::INVALID_LICENSE:
 				$renew_link = sprintf(
-					// translators: %s is the renew link label.
+				// translators: %s is the renew link label.
 					'<a href="https://evnt.is/1bdu" target="_blank" rel="noreferrer noopener">%s</a>',
 					_x( 'renew your license', 'link label for renewing the license', 'event-tickets' )
 				);
 				$message = sprintf(
-					// translators: %s is the renew link.
+				// translators: %s is the renew link.
 					__(
 						'Your license for Seating has expired. You need to %s to continue using Seating for Event Tickets.',
 						'event-tickets'
@@ -91,6 +92,30 @@ class Error_Content {
 					$renew_link
 				);
 				break;
+			case Service_Status::INVALID_LICENSE:
+				$settings_link = sprintf(
+				// translators: %s is the settings link label.
+					'<a href="https://evnt.is/1bdu" target="_blank" rel="noreferrer noopener">%s</a>',
+					_x( 'Check your license key settings', 'License settings link label', 'event-tickets' )
+				);
+				
+				$login_link = sprintf(
+				// translators: %s is the login link label.
+					'<a href="https://evnt.is/1be1 " target="_blank" rel="noreferrer noopener">%s</a>',
+					_x( 'log into your account', 'Login link label', 'event-tickets' )
+				);
+				
+				$message = sprintf(
+				// translators: %1$s is the settings link, %2$s is the login link.
+					__(
+						'Your license for Seating is invalid. %1$s or %2$s.',
+						'event-tickets'
+					),
+					$settings_link,
+					$login_link
+				);
+				break;
+			default:
 		}
 
 		$this->template->template(
@@ -106,7 +131,7 @@ class Error_Content {
 	/**
 	 * Returns the message to be displayed in the editor relative to the service status.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param Service_Status $status The service status object.
 	 *
@@ -118,9 +143,9 @@ class Error_Content {
 		switch ( $status->get_status() ) {
 			default:
 				break;
-			case Service_Status::SERVICE_DOWN:
+			case Service_Status::SERVICE_UNREACHABLE:
 				$message = __(
-					'The Seating Builder service is down and assigned seating is not available. We are working to restore functionality.',
+					'Your site cannot connect to the Seating Builder service and assigned seating is not available.',
 					'event-tickets'
 				);
 				break;

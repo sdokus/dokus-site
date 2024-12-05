@@ -202,7 +202,7 @@ __webpack_require__.r(__webpack_exports__);
 /**
  * Go to associated events.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {AssociatedEventsData} data The layout ID.
  */
@@ -215,7 +215,7 @@ function goToAssociatedEvents(data) {
 /**
  * Initializes iframe and the communication with the service.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {HTMLDocument|null} dom The document to use to search for the iframe element.
  *
@@ -287,7 +287,7 @@ module.exports = tec.tickets.seating.ajax;
 /**
  * Handles the seat types updated action.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {UpdatedSeatTypeData} data The updated seat types.
  *
@@ -307,7 +307,7 @@ function handleSeatTypesUpdated(_x) {
 /**
  * Handles the seat type deleted action.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {SeatTypeDeletedData} data The deleted seat type data.
  *
@@ -350,7 +350,7 @@ function handleSeatTypeDeleted(_x2) {
 /**
  * Handles the deletion of reservations.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {ReservationsDeletedData} data The IDs of the reservations that were deleted.
  *
@@ -392,7 +392,7 @@ function handleReservationsDeleted(_x3) {
 /**
  * Handles the update of Reservations following a Seat Type update.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @param {ReservationsUpdateFollowingSeatTypesData} data The updated reservations.
  *

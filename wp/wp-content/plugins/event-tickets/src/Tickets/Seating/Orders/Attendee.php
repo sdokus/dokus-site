@@ -2,7 +2,7 @@
 /**
  * Manage seat selection data for attendee.
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @package TEC/Tickets/Seating/Orders
  */
@@ -19,11 +19,12 @@ use TEC\Tickets\Seating\Service\Reservations;
 use TEC\Tickets\Seating\Meta;
 use WP_Query;
 use WP_Post;
+use Tribe__Tickets__Ticket_Object as Ticket_Object;
 
 /**
  * Class Attendee
  *
- * @since TBD
+ * @since 5.16.0
  *
  * @package TEC/Tickets/Seating/Orders
  */
@@ -31,7 +32,7 @@ class Attendee {
 	/**
 	 * Adds the attendee seat column to the attendee list.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array<string,string> $columns The columns for the Attendees table.
 	 * @param int                  $event_id The event ID.
@@ -55,7 +56,7 @@ class Attendee {
 	/**
 	 * Renders the seat column for the attendee list.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string              $value  Row item value.
 	 * @param array<string,mixed> $item   Row item data.
@@ -67,7 +68,7 @@ class Attendee {
 		if ( 'seat' !== $column ) {
 			return $value;
 		}
-		
+
 		if ( ! isset( $item['ID'] ) ) {
 			return '-';
 		}
@@ -100,7 +101,7 @@ class Attendee {
 	/**
 	 * Handle seat column sorting.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array<string,mixed> $query_args An array of the query arguments the query will be initialized with.
 	 * @param WP_Query            $query The query object, the query arguments have not been parsed yet.
@@ -145,7 +146,7 @@ class Attendee {
 	/**
 	 * Remove move row action from attendee list for seated tickets.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array<string,mixed> $actions The list of actions.
 	 * @param array<string,mixed> $item    The item being acted upon.
@@ -196,7 +197,7 @@ class Attendee {
 	/**
 	 * Include seating data into the attendee object.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param WP_Post $post The attendee post object, decorated with a set of custom properties.
 	 *
@@ -233,7 +234,7 @@ class Attendee {
 	/**
 	 * Include seat info in email.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param Template $template The email template instance.
 	 *
@@ -262,7 +263,7 @@ class Attendee {
 	/**
 	 * Inject seating label with ticket name on My Tickets page.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string   $html The HTML content of ticket information.
 	 * @param Template $template The email template instance.
@@ -292,7 +293,7 @@ class Attendee {
 	/**
 	 * Formats a  set of Attendees to the format expected by the Seats Report AJAX request.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param array<array<string,mixed>> $attendees The Attendees to format.
 	 *
@@ -300,7 +301,7 @@ class Attendee {
 	 */
 	public function format_many( array $attendees ): array {
 		$unknown_attendee_name = __( 'Unknown', 'event-tickets' );
-		
+
 		// Filter out attendees that are not from the Commerce module.
 		$attendees = array_filter(
 			$attendees,
@@ -308,7 +309,7 @@ class Attendee {
 				return Module::class === $attendee['provider'];
 			}
 		);
-		
+
 		$associated_attendees = array_reduce(
 			$attendees,
 			static function ( array $carry, array $attendee ): array {
@@ -366,11 +367,11 @@ class Attendee {
 
 		return $formatted_attendees;
 	}
-	
+
 	/**
 	 * Inject seating label with ticket name on Order success page.
 	 *
-	 * @since TBD
+	 * @since 5.16.0
 	 *
 	 * @param string   $html The HTML content of ticket information.
 	 * @param Template $template The email template instance.
@@ -380,20 +381,48 @@ class Attendee {
 	public function inject_seat_info_in_order_success_page( string $html, Template $template ): string {
 		$context    = $template->get_local_values();
 		$seat_label = Arr::get( $context, [ 'attendee', 'seat_label' ], false );
-		
+
 		if ( ! $seat_label ) {
 			$ticket_id   = Arr::get( $context, [ 'attendee', 'product_id' ] );
 			$slr_enabled = get_post_meta( $ticket_id, Meta::META_KEY_ENABLED, true );
 			$seat_label  = $slr_enabled ? __( 'Unassigned', 'event-tickets' ) : '';
 		}
-		
+
 		if ( empty( $seat_label ) ) {
 			return $html;
 		}
-		
+
 		$head_div = '<div class="tec-tickets__attendees-list-item-attendee-details-ticket">';
 		$label    = $head_div . sprintf( '<span class="tec-tickets__ticket-information__seat-label">%s</span>', esc_html( $seat_label ) );
-		
+
 		return str_replace( $head_div, $label, $html );
+	}
+
+	/**
+	 * Calculates the total number of available seats for a given set of tickets considering their seat type.
+	 *
+	 * @since 5.16.0
+	 *
+	 * @param array<string,mixed>  $render_context The render context for the attendee page.
+	 * @param int                  $post_id The post ID.
+	 * @param array<Ticket_Object> $tickets The tickets for the event.
+	 *
+	 * @return array<string,mixed> The updated render context.
+	 */
+	public function adjust_attendee_page_render_context_for_seating( array $render_context, int $post_id, array $tickets ): array {
+		$available_by_seat_type = [];
+
+		foreach ( $tickets as $ticket ) {
+			$ticket_seat_type = get_post_meta( $ticket->ID, Meta::META_KEY_SEAT_TYPE, true );
+			if ( isset( $available_by_seat_type[ $ticket_seat_type ] ) && $ticket->available() <= $available_by_seat_type[ $ticket_seat_type ] ) {
+				continue;
+			}
+
+			$available_by_seat_type[ $ticket_seat_type ] = $ticket->available();
+		}
+
+		$render_context['ticket_totals']['available'] = array_sum( $available_by_seat_type );
+
+		return $render_context;
 	}
 }
